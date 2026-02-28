@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 backend/.env
 *.egg-info/
+venv/
 
 # Node
 node_modules/
@@ -21,3 +22,9 @@ Thumbs.db
 # Database
 *.db
 *.sqlite3
+
+# Docker
+.env
+
+# Misc
+*.log

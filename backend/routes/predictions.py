@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from schemas.schemas import PredictionOut
-from services.ml_service import predict_depletion, predict_all
+from services.ml_service import predict_depletion, predict_all, get_trend_line
 
 router = APIRouter(prefix="/api/predictions", tags=["ML Predictions"])
 
@@ -18,3 +18,9 @@ def get_all_predictions(db: Session = Depends(get_db)):
 def get_prediction(sector: str, resource_type: str, db: Session = Depends(get_db)):
     """Forecast depletion date for a specific sector and resource."""
     return predict_depletion(db, sector, resource_type)
+
+
+@router.get("/{sector}/{resource_type}/trend")
+def get_prediction_trend(sector: str, resource_type: str, db: Session = Depends(get_db)):
+    """Return regression line coordinates for chart overlay."""
+    return get_trend_line(db, sector, resource_type)

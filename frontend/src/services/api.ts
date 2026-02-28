@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
 });
 
 export interface ResourceLog {
@@ -92,6 +92,22 @@ export const batchProcessReports = () =>
 
 export const fetchPredictions = () =>
   API.get<Prediction[]>('/api/predictions').then(r => r.data);
+
+export interface TrendLine {
+  sector_id: string;
+  resource_type: string;
+  slope: number;
+  r_squared: number;
+  ma_window: number;
+  data_points_used: number;
+  ma_series: { timestamp: string; ma_stock: number }[];
+  forecast: { timestamp: string; predicted_stock: number }[];
+}
+
+export const fetchTrendLine = (sector: string, resourceType: string) =>
+  API.get<TrendLine>(
+    `/api/predictions/${encodeURIComponent(sector)}/${encodeURIComponent(resourceType)}/trend`
+  ).then(r => r.data);
 
 export const uploadCSV = (file: File) => {
   const form = new FormData();
