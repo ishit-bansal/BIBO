@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid, ReferenceLine,
+  ResponsiveContainer, CartesianGrid, ReferenceLine, Line,
 } from 'recharts';
 import type { ResourceTick, ResourceAnalytics, TimelinePoint } from '../hooks/useLiveData';
+import { fetchTrendLine, fetchPredictions } from '../services/api';
+import type { TrendLine, Prediction } from '../services/api';
 
 const RESOURCE_KEYS = [
   'Wakanda|Arc Reactor Cores',
@@ -93,6 +95,9 @@ function ChartTooltip({ active, payload, focusedKey }: {
     ? payload.filter(p => p.dataKey === SHORT_NAMES[focusedKey])
     : payload;
 
+  const maEntry = payload.find(p => p.dataKey === 'MA');
+  const fcstEntry = payload.find(p => p.dataKey === 'FCST');
+
   return (
     <div className="rounded-lg border border-gray-700 bg-[#0f1729] px-3 py-2 shadow-xl">
       <div className="text-[10px] font-semibold text-gray-400 mb-1.5 border-b border-gray-700 pb-1">
@@ -110,6 +115,24 @@ function ChartTooltip({ active, payload, focusedKey }: {
           </div>
         );
       })}
+      {maEntry && (
+        <div className="flex items-center gap-2 py-0.5 border-t border-gray-800 mt-1 pt-1">
+          <span className="h-2 w-0.5 border-t border-dashed border-white/60" />
+          <span className="text-[10px] text-gray-500 w-28">24h Moving Avg</span>
+          <span className="text-[10px] font-mono text-gray-400 ml-auto">
+            {maEntry.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+          </span>
+        </div>
+      )}
+      {fcstEntry && (
+        <div className="flex items-center gap-2 py-0.5">
+          <span className="h-2 w-0.5 border-t border-dashed border-red-400" />
+          <span className="text-[10px] text-red-400 w-28">Forecast</span>
+          <span className="text-[10px] font-mono text-red-300 ml-auto">
+            {fcstEntry.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -229,10 +252,42 @@ interface Props {
   timelineLoaded: boolean;
 }
 
+// Map focused keys to their sector/resource for the predictions API
+const KEY_TO_PARTS: Record<string, { sector: string; resource: string }> = {
+  'Wakanda|Arc Reactor Cores': { sector: 'Wakanda', resource: 'Arc Reactor Cores' },
+  'New Asgard|Vibranium (kg)': { sector: 'New Asgard', resource: 'Vibranium (kg)' },
+  'Sanctum Sanctorum|Clean Water (L)': { sector: 'Sanctum Sanctorum', resource: 'Clean Water (L)' },
+  'Sokovia|Pym Particles': { sector: 'Sokovia', resource: 'Pym Particles' },
+  'Avengers Compound|Medical Kits': { sector: 'Avengers Compound', resource: 'Medical Kits' },
+};
+
 export default function LiveTicker({ connected, simTime, progress, currentTick, fullTimeline, timelineLoaded }: Props) {
   const [range, setRange] = useState<TimeRange>('all');
   const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  const [trendData, setTrendData] = useState<TrendLine | null>(null);
+  const [prediction, setPrediction] = useState<Prediction | null>(null);
   const analytics = currentTick?.analytics ?? {};
+
+  // Fetch ML trend line + prediction when a resource is focused
+  useEffect(() => {
+    if (!focusedKey) {
+      setTrendData(null);
+      setPrediction(null);
+      return;
+    }
+    const parts = KEY_TO_PARTS[focusedKey];
+    if (!parts) return;
+
+    fetchTrendLine(parts.sector, parts.resource)
+      .then(setTrendData)
+      .catch(() => setTrendData(null));
+    fetchPredictions()
+      .then(preds => {
+        const match = preds.find(p => p.sector_id === parts.sector && p.resource_type === parts.resource);
+        setPrediction(match ?? null);
+      })
+      .catch(() => setPrediction(null));
+  }, [focusedKey]);
 
   const currentTickIndex = currentTick?.tick_index ?? fullTimeline.length - 1;
 
@@ -257,7 +312,7 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
   }, [filteredTimeline]);
 
   const chartData = useMemo(() => {
-    return filteredTimeline.map(pt => {
+    const baseData = filteredTimeline.map(pt => {
       const point: Record<string, string | number> = {
         time: fmtAxisLabel(pt.timestamp, range),
         rawTime: pt.timestamp,
@@ -268,11 +323,50 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
       }
       return point;
     });
-  }, [filteredTimeline, range]);
+
+    // When focused with trend data, merge MA line and append forecast points
+    if (!focusedKey || !trendData) return baseData;
+
+    const short = SHORT_NAMES[focusedKey];
+    const maByTs = new Map(trendData.ma_series.map(m => [m.timestamp, m.ma_stock]));
+
+    // Add MA values to existing data points
+    for (const pt of baseData) {
+      const ma = maByTs.get(pt.rawTime as string);
+      if (ma !== undefined) pt['MA'] = ma;
+    }
+
+    // Append forecast points beyond the data
+    if (trendData.forecast.length > 0) {
+      for (const fc of trendData.forecast) {
+        if (baseData.some(d => d.rawTime === fc.timestamp)) continue;
+        baseData.push({
+          time: fmtAxisLabel(fc.timestamp, range),
+          rawTime: fc.timestamp,
+          FCST: fc.predicted_stock,
+        });
+      }
+    }
+
+    return baseData;
+  }, [filteredTimeline, range, focusedKey, trendData]);
 
   const snapLabel = useMemo(() => {
-    const match = chartData.find(d => d.rawTime === SNAP_TIME);
-    return match?.time as string | undefined;
+    // Find the chart point closest to the snap timestamp
+    const snapMs = new Date(SNAP_TIME).getTime();
+    let best: string | undefined;
+    let bestDist = Infinity;
+    for (const d of chartData) {
+      const ts = d.rawTime as string;
+      if (!ts) continue;
+      const dist = Math.abs(new Date(ts).getTime() - snapMs);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = d.time as string;
+      }
+    }
+    // Only match if within 1 hour of the snap
+    return bestDist <= 3_600_000 ? best : undefined;
   }, [chartData]);
 
   const rangeChanges = useMemo(() => {
@@ -395,8 +489,8 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
                   cursor={{ stroke: '#475569', strokeDasharray: '4 4' }}
                 />
                 {snapLabel && (
-                  <ReferenceLine x={snapLabel} stroke="#ef4444" strokeDasharray="4 4"
-                    label={{ value: 'SNAP', fill: '#ef4444', fontSize: 9, position: 'top' }} />
+                  <ReferenceLine x={snapLabel} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={1.5}
+                    label={{ value: '⚡ SNAP EVENT', fill: '#ef4444', fontSize: 9, fontWeight: 700, position: 'top' }} />
                 )}
                 {bigChartKeys.map(k => (
                   <Area
@@ -410,6 +504,34 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
                     isAnimationActive={false}
                   />
                 ))}
+                {/* ML trend: moving average line */}
+                {focusedKey && trendData && trendData.ma_series.length > 0 && (
+                  <Line
+                    type="monotone"
+                    dataKey="MA"
+                    stroke="#ffffff"
+                    strokeWidth={1.5}
+                    strokeDasharray="6 3"
+                    dot={false}
+                    isAnimationActive={false}
+                    connectNulls
+                    name="24h Moving Avg"
+                  />
+                )}
+                {/* ML trend: forecast/depletion projection line */}
+                {focusedKey && trendData && trendData.forecast.length > 0 && (
+                  <Line
+                    type="monotone"
+                    dataKey="FCST"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    strokeDasharray="8 4"
+                    dot={false}
+                    isAnimationActive={false}
+                    connectNulls
+                    name="Predicted Depletion"
+                  />
+                )}
                 {focusedKey && (
                   <defs>
                     <linearGradient id="focus-grad" x1="0" y1="0" x2="0" y2="1">
@@ -420,6 +542,47 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
                 )}
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* ML prediction summary — only when focused */}
+        {focusedKey && prediction && prediction.data_points_used > 0 && (
+          <div className="mb-3 flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-900/60 border border-gray-800">
+              <span className="text-[9px] text-gray-500 uppercase">ML Status</span>
+              <span className={`text-[10px] font-bold ${
+                prediction.status === 'depleted' ? 'text-red-400' :
+                prediction.status === 'critical' ? 'text-amber-400' :
+                prediction.status === 'warning' ? 'text-yellow-400' : 'text-emerald-400'
+              }`}>
+                {prediction.status.toUpperCase()}
+              </span>
+            </div>
+            {prediction.hours_until_zero != null && prediction.hours_until_zero > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-900/60 border border-gray-800">
+                <span className="text-[9px] text-gray-500 uppercase">Predicted Zero</span>
+                <span className="text-[10px] font-bold text-red-400 font-mono">
+                  {Math.round(prediction.hours_until_zero)}h
+                  {prediction.predicted_zero_date && (
+                    <span className="text-gray-500 ml-1">
+                      ({new Date(prediction.predicted_zero_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit' })})
+                    </span>
+                  )}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-900/60 border border-gray-800">
+              <span className="text-[9px] text-gray-500 uppercase">Depletion Rate</span>
+              <span className="text-[10px] font-bold text-gray-300 font-mono">{prediction.depletion_rate.toFixed(2)}/hr</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-900/60 border border-gray-800">
+              <span className="text-[9px] text-gray-500 uppercase">Confidence</span>
+              <span className="text-[10px] font-bold text-gray-300 font-mono">{(prediction.confidence_score * 100).toFixed(1)}%</span>
+            </div>
+            <div className="flex items-center gap-3 text-[9px] text-gray-600">
+              <span className="flex items-center gap-1"><span className="w-4 border-t-2 border-dashed border-white/60" /> 24h MA</span>
+              <span className="flex items-center gap-1"><span className="w-4 border-t-2 border-dashed border-red-400" /> Forecast</span>
+            </div>
           </div>
         )}
 

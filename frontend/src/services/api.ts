@@ -93,6 +93,16 @@ export const batchProcessReports = () =>
 export const fetchPredictions = () =>
   API.get<Prediction[]>('/api/predictions').then(r => r.data);
 
+export interface RedactionLog {
+  report_id: string;
+  original_text: string;
+  redacted_text: string;
+  redactions_applied: { type: string; original: string; replacement: string }[];
+}
+
+export const fetchRedactionLog = (reportId: string) =>
+  API.get<RedactionLog>(`/api/reports/${encodeURIComponent(reportId)}/redaction-log`).then(r => r.data);
+
 export interface TrendLine {
   sector_id: string;
   resource_type: string;
@@ -204,3 +214,68 @@ export const fetchHeroEvents = () =>
 
 export const fetchSectorSummaries = (time?: string) =>
   API.get<SectorSummary[]>('/api/heroes/sectors', { params: time ? { time } : undefined }).then(r => r.data);
+
+/* ── Supply Chain types ───────────────────────────────── */
+
+export interface FactoryResourceState {
+  current_stock: number;
+  max_capacity: number;
+  fill_pct: number;
+  production_rate: number;
+  total_produced: number;
+  total_shipped: number;
+  warning: boolean;
+  critical: boolean;
+  hours_until_empty: number | null;
+}
+
+export interface FactoryState {
+  id: string;
+  name: string;
+  sector: string;
+  coords: [number, number];
+  icon: string;
+  resources: Record<string, FactoryResourceState>;
+}
+
+export interface Shipment {
+  shipment_id: string;
+  resource_type: string;
+  quantity: number;
+  priority: string;
+  source_factory_id: string;
+  source_name: string;
+  source_sector: string;
+  source_lat: number;
+  source_lon: number;
+  dest_sector: string;
+  dest_hero: string;
+  dest_lat: number;
+  dest_lon: number;
+  depart_time: string;
+  arrive_time: string;
+  travel_hours: number;
+  status: 'pending' | 'in_transit' | 'delivered';
+  progress_pct: number;
+  eta_hours: number;
+}
+
+export interface SupplyWarning {
+  type: 'critical' | 'warning';
+  factory: string;
+  resource: string;
+  stock_pct: number;
+}
+
+export interface SupplyOverview {
+  timestamp: string;
+  factories: FactoryState[];
+  active_shipments: Shipment[];
+  pending_shipments: Shipment[];
+  delivered_count: number;
+  total_shipments: number;
+  warnings: SupplyWarning[];
+}
+
+export const fetchSupplyOverview = (time?: string) =>
+  API.get<SupplyOverview>('/api/supply/overview', { params: time ? { time } : undefined }).then(r => r.data);

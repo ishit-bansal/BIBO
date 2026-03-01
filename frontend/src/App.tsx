@@ -6,10 +6,11 @@ import IntelTable from './components/IntelTable';
 import ReportForm from './components/ReportForm';
 import CSVUpload from './components/CSVUpload';
 import HeroMap from './components/HeroMap';
+import SupplyChainMap from './components/SupplyChainMap';
 import LiveTicker from './components/LiveTicker';
 import { useLiveData } from './hooks/useLiveData';
 
-type Tab = 'dashboard' | 'tactical' | 'intel' | 'submit';
+type Tab = 'dashboard' | 'tactical' | 'supply' | 'intel' | 'submit';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -18,6 +19,7 @@ function App() {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'dashboard', label: 'Resource HUD' },
     { id: 'tactical', label: 'Tactical Map' },
+    { id: 'supply', label: 'Supply Chain' },
     { id: 'intel', label: 'Intelligence Feed' },
     { id: 'submit', label: 'Field Report' },
   ];
@@ -64,13 +66,18 @@ function App() {
               fullTimeline={live.fullTimeline}
               timelineLoaded={live.timelineLoaded}
             />
-            <StatCards />
-            <SectorHeatmap />
+            <StatCards analytics={live.currentTick?.analytics} simTime={live.simTime} />
+            <SectorHeatmap analytics={live.currentTick?.analytics} />
           </div>
         )}
         {activeTab === 'tactical' && (
           <div className="space-y-6">
             <HeroMap simTime={live.simTime || undefined} />
+          </div>
+        )}
+        {activeTab === 'supply' && (
+          <div className="space-y-6">
+            <SupplyChainMap simTime={live.simTime || undefined} />
           </div>
         )}
         {activeTab === 'intel' && <IntelTable />}

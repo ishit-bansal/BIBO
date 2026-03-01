@@ -13,6 +13,7 @@ COPY backend/ ./
 
 COPY historical_avengers_data.csv /app/historical_avengers_data.csv
 COPY field_intel_reports.json /app/field_intel_reports.json
+COPY supply_chain_shipments.csv /app/supply_chain_shipments.csv
 
 EXPOSE 8000
 

@@ -1,81 +1,110 @@
-import { useEffect, useState } from 'react';
-import { fetchPredictions, fetchReports } from '../services/api';
-import type { Prediction, IntelReport } from '../services/api';
+import type { ResourceAnalytics } from '../hooks/useLiveData';
 
-export default function StatCards() {
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [reports, setReports] = useState<IntelReport[]>([]);
-  const [loading, setLoading] = useState(true);
+const RESOURCE_KEYS = [
+  'Wakanda|Arc Reactor Cores',
+  'New Asgard|Vibranium (kg)',
+  'Sanctum Sanctorum|Clean Water (L)',
+  'Sokovia|Pym Particles',
+  'Avengers Compound|Medical Kits',
+];
 
-  useEffect(() => {
-    Promise.all([fetchPredictions(), fetchReports({ limit: 500 })])
-      .then(([preds, reps]) => {
-        setPredictions(preds);
-        setReports(reps);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+interface Props {
+  analytics: Record<string, ResourceAnalytics> | undefined;
+  simTime: string;
+}
 
-  if (loading) {
+export default function StatCards({ analytics, simTime }: Props) {
+  if (!analytics || Object.keys(analytics).length === 0) {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-28 animate-pulse rounded-lg bg-gray-800/50" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-lg bg-gray-800/50" />
         ))}
       </div>
     );
   }
 
-  const withData = predictions.filter(p => p.data_points_used > 0);
-  const depleted = withData.filter(p => p.status === 'depleted').length;
-  const critical = withData.filter(p => p.status === 'critical').length;
+  const entries = RESOURCE_KEYS.map(k => analytics[k]).filter(Boolean);
 
-  const active = withData.filter(p => p.hours_until_zero != null && p.hours_until_zero > 0);
-  const avgHours =
-    active.length > 0
-      ? Math.round(active.reduce((s, p) => s + (p.hours_until_zero ?? 0), 0) / active.length)
-      : 0;
+  const totalStock = entries.reduce((s, a) => s + a.avg_stock, 0);
+  const avgUsage = entries.length > 0
+    ? entries.reduce((s, a) => s + a.avg_usage, 0) / entries.length
+    : 0;
+  const declining = entries.filter(a => a.trend === 'down').length;
+  const rising = entries.filter(a => a.trend === 'up').length;
+  const belowAvg = entries.filter(a => a.above_avg_24h === false).length;
+  const netChange = entries.reduce((s, a) => s + a.hourly_change, 0);
 
-  const threatCount = reports.filter(r => r.priority === 'Avengers Level Threat').length;
+  const dt = simTime ? new Date(simTime) : null;
+  const timeLabel = dt
+    ? dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+      dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+    : '--';
 
   const cards = [
     {
-      label: 'Depleted Resources',
-      value: depleted,
-      color: depleted > 0 ? 'text-red-400' : 'text-emerald-400',
-      bg: depleted > 0 ? 'bg-red-900/20 border-red-800/50' : 'bg-emerald-900/20 border-emerald-800/50',
+      label: 'Sim Time',
+      value: timeLabel,
+      sub: null,
+      color: 'text-white',
+      border: 'border-gray-700',
+      icon: '🕐',
     },
     {
-      label: 'Critical Status',
-      value: critical,
-      color: critical > 0 ? 'text-amber-400' : 'text-emerald-400',
-      bg: critical > 0 ? 'bg-amber-900/20 border-amber-800/50' : 'bg-emerald-900/20 border-emerald-800/50',
+      label: 'Total Stock',
+      value: totalStock.toLocaleString(undefined, { maximumFractionDigits: 0 }),
+      sub: `${netChange >= 0 ? '+' : ''}${netChange.toFixed(1)} / hr`,
+      color: netChange >= 0 ? 'text-emerald-400' : 'text-red-400',
+      border: netChange >= 0 ? 'border-emerald-800/50' : 'border-red-800/50',
+      icon: '📦',
     },
     {
-      label: 'Avg Hours to Zero',
-      value: avgHours > 0 ? `${avgHours}h` : 'N/A',
-      color: avgHours < 48 ? 'text-red-400' : 'text-sky-400',
-      bg: 'bg-sky-900/20 border-sky-800/50',
+      label: 'Avg Usage Rate',
+      value: avgUsage.toFixed(1) + '/hr',
+      sub: 'across all sectors',
+      color: 'text-sky-400',
+      border: 'border-sky-800/50',
+      icon: '⚡',
     },
     {
-      label: 'Avenger-Level Threats',
-      value: threatCount,
-      color: threatCount > 10 ? 'text-red-400' : 'text-amber-400',
-      bg: 'bg-amber-900/20 border-amber-800/50',
+      label: 'Rising',
+      value: rising,
+      sub: `of ${entries.length} resources`,
+      color: rising > 0 ? 'text-emerald-400' : 'text-gray-400',
+      border: rising > 0 ? 'border-emerald-800/50' : 'border-gray-700',
+      icon: '📈',
+    },
+    {
+      label: 'Declining',
+      value: declining,
+      sub: `of ${entries.length} resources`,
+      color: declining > 0 ? 'text-red-400' : 'text-emerald-400',
+      border: declining > 0 ? 'border-red-800/50' : 'border-emerald-800/50',
+      icon: '📉',
+    },
+    {
+      label: 'Below 24h Avg',
+      value: belowAvg,
+      sub: belowAvg > 0 ? 'needs attention' : 'all healthy',
+      color: belowAvg > 2 ? 'text-red-400' : belowAvg > 0 ? 'text-amber-400' : 'text-emerald-400',
+      border: belowAvg > 2 ? 'border-red-800/50' : belowAvg > 0 ? 'border-amber-800/50' : 'border-emerald-800/50',
+      icon: '⚠️',
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-      {cards.map((card) => (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+      {cards.map(card => (
         <div
           key={card.label}
-          className={`rounded-lg border p-5 ${card.bg}`}
+          className={`rounded-lg border bg-[#0d1220] px-4 py-3 ${card.border} transition-colors`}
         >
-          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
-            {card.label}
-          </p>
-          <p className={`mt-2 text-3xl font-bold ${card.color}`}>{card.value}</p>
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-sm">{card.icon}</span>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500">{card.label}</p>
+          </div>
+          <p className={`text-2xl font-bold font-mono ${card.color}`}>{card.value}</p>
+          {card.sub && <p className="text-[10px] text-gray-500 mt-0.5">{card.sub}</p>}
         </div>
       ))}
     </div>
