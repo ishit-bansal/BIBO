@@ -95,8 +95,8 @@ def get_resources(
 def get_timeline(db: Session = Depends(get_db)):
     """Full averaged timeline for every timestamp in the CSV.
 
-    Returns one entry per timestamp with avg stock/usage per sector|resource.
-    Used by the Live Feed chart to display the complete dataset from tick 0.
+    Returns one entry per timestamp with avg stock per sector|resource.
+    avg_usage is derived from actual stock deltas (not the CSV noise column).
     """
     rows = (
         db.query(
@@ -104,27 +104,31 @@ def get_timeline(db: Session = Depends(get_db)):
             ResourceLog.sector_id,
             ResourceLog.resource_type,
             func.avg(ResourceLog.stock_level).label("avg_stock"),
-            func.avg(ResourceLog.usage_rate_hourly).label("avg_usage"),
         )
         .group_by(ResourceLog.timestamp, ResourceLog.sector_id, ResourceLog.resource_type)
         .order_by(ResourceLog.timestamp)
         .all()
     )
 
-    from collections import defaultdict
     by_ts: dict[datetime, dict[str, dict]] = defaultdict(dict)
     ordered_ts: list[datetime] = []
     seen: set[datetime] = set()
 
-    for ts, sector, resource, avg_stock, avg_usage in rows:
+    for ts, sector, resource, avg_stock in rows:
         key = f"{sector}|{resource}"
         by_ts[ts][key] = {
             "avg_stock": round(float(avg_stock), 2),
-            "avg_usage": round(float(avg_usage), 2),
         }
         if ts not in seen:
             seen.add(ts)
             ordered_ts.append(ts)
+
+    prev_stocks: dict[str, float] = {}
+    for ts in ordered_ts:
+        for key, data in by_ts[ts].items():
+            prev = prev_stocks.get(key)
+            data["avg_usage"] = round(abs(data["avg_stock"] - prev), 2) if prev is not None else 0.0
+            prev_stocks[key] = data["avg_stock"]
 
     total = len(ordered_ts)
     return [
