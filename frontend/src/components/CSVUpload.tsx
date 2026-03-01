@@ -113,9 +113,10 @@ function RiskGauge({ score, size = 48, label }: { score: number; size?: number; 
 
 interface CSVUploadProps {
   snapCount?: number;
+  onAnalysisChange?: (result: AnalysisResult | null) => void;
 }
 
-export default function CSVUpload({ snapCount = 0 }: CSVUploadProps) {
+export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUploadProps) {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [pipelineStep, setPipelineStep] = useState(0);
@@ -205,6 +206,10 @@ export default function CSVUpload({ snapCount = 0 }: CSVUploadProps) {
       }
     });
   }, [snapCount, result]);
+
+  useEffect(() => {
+    onAnalysisChange?.(result);
+  }, [result, onAnalysisChange]);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.name.endsWith('.csv')) {

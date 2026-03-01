@@ -145,13 +145,19 @@ export interface AnalysisPairStats {
   min: number;
   max: number;
   mean: number;
+  std_dev: number;
   depletion_rate: number;
+  overall_slope: number;
+  r_squared: number;
+  noise_std: number;
+  trend_acceleration: number;
   predicted_zero: string | null;
   hours_to_zero: number | null;
   status: 'stable' | 'warning' | 'critical' | 'depleted';
   data_points: number;
   risk_score: number;
   stock_pct: number;
+  had_crash_recovery: boolean;
 }
 
 export interface WeeklyForecastDay {
@@ -324,6 +330,56 @@ export interface SupplyOverview {
 
 export const fetchSupplyOverview = (time?: string) =>
   API.get<SupplyOverview>('/api/supply/overview', { params: time ? { time } : undefined }).then(r => r.data);
+
+/* ── AI Chat ──────────────────────────────────────────── */
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface ChatResourceContext {
+  sector_id: string;
+  resource_type: string;
+  current: number;
+  min: number;
+  max: number;
+  mean: number;
+  std_dev: number;
+  depletion_rate: number;
+  overall_slope: number;
+  r_squared: number;
+  noise_std: number;
+  trend_acceleration: number;
+  predicted_zero: string | null;
+  hours_to_zero: number | null;
+  status: string;
+  risk_score: number;
+  data_points: number;
+  had_crash_recovery: boolean;
+  min_at?: { timestamp: string; stock: number };
+  max_at?: { timestamp: string; stock: number };
+  sampled_points?: { timestamp: string; stock: number }[];
+  weekly_forecast: { day: number; projected_stock: number; date: string }[];
+}
+
+export interface ChatCSVContext {
+  total_records: number;
+  time_range_start: string;
+  time_range_end: string;
+  resources: ChatResourceContext[];
+}
+
+export const sendChatMessage = (
+  message: string,
+  csvContext: ChatCSVContext | null,
+  history: ChatMessage[],
+) =>
+  API.post<{ reply: string }>('/api/chat', {
+    message,
+    csv_context: csvContext,
+    history: history.slice(-6),
+  }).then(r => r.data.reply);
 
 // --- Auth / Face Management ---
 

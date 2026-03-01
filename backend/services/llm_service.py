@@ -8,7 +8,7 @@ from google import genai
 logger = logging.getLogger(__name__)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-MODEL = "gemini-2.0-flash"
+MODEL = "gemini-2.5-flash-lite"
 
 EXTRACTION_PROMPT = """You are an intelligence analyst for a crisis management system called Project Sentinel.
 

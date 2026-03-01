@@ -336,6 +336,17 @@ def analyze_csv(file: UploadFile = File(...)):
                 "date": (last_ts + timedelta(hours=h)).isoformat(),
             })
 
+        # Trend acceleration: positive = depletion slowing, negative = accelerating
+        trend_accel = round(forecast_slope - slope, 4)
+
+        # Detect if resource experienced a crash-and-recovery (snap signature)
+        min_idx = int(np.argmin(stocks))
+        had_crash_recovery = (
+            float(stocks[min_idx]) < float(stocks[0]) * 0.15
+            and min_idx < len(stocks) - 5
+            and float(stocks[-1]) > float(stocks[min_idx]) + 50
+        )
+
         pairs.append({
             "sector_id": str(sector),
             "resource_type": str(resource),
@@ -344,13 +355,19 @@ def analyze_csv(file: UploadFile = File(...)):
                 "min": round(float(y.min()), 2),
                 "max": max_stock,
                 "mean": round(float(y.mean()), 2),
+                "std_dev": round(float(np.std(y)), 2),
                 "depletion_rate": round(forecast_slope, 4),
+                "overall_slope": round(slope, 4),
+                "r_squared": round(r_squared, 4),
+                "noise_std": round(noise_std, 2),
+                "trend_acceleration": trend_accel,
                 "predicted_zero": predicted_zero,
                 "hours_to_zero": hours_to_zero_val,
                 "status": status,
                 "data_points": len(timestamps),
                 "risk_score": risk_score,
                 "stock_pct": round(stock_pct, 1),
+                "had_crash_recovery": had_crash_recovery,
             },
             "raw": raw,
             "ma": ma_series,

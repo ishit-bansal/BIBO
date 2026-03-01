@@ -41,6 +41,7 @@ from routes.heroes import router as heroes_router
 from routes.supply import router as supply_router
 from routes.ws import router as ws_router
 from routes.auth import router as auth_router
+from routes.chat import router as chat_router
 
 app.include_router(resources_router)
 app.include_router(reports_router)
@@ -50,6 +51,7 @@ app.include_router(heroes_router)
 app.include_router(supply_router)
 app.include_router(ws_router)
 app.include_router(auth_router)
+app.include_router(chat_router)
 
 
 @app.get("/")

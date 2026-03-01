@@ -415,17 +415,10 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
         </div>
       </div>
 
-      {/* ticker tape */}
-      <div className="flex overflow-x-auto border-0 bg-[#080c16]">
-        {RESOURCE_KEYS.map(k => {
-          const a = analytics[k];
-          if (!a) return null;
-          return <TickerItem key={k} a={a} color={PAIR_COLORS[k]} short={SHORT_NAMES[k]} />;
-        })}
-        {Object.keys(analytics).length === 0 && (
-          <div className="px-4 py-2 text-[10px] text-gray-600">Waiting for first data tick…</div>
-        )}
-      </div>
+      {/* spacer (ticker tape removed) */}
+      {Object.keys(analytics).length === 0 && (
+        <div className="px-4 py-2 text-[10px] text-gray-600 bg-[#080c16]">Waiting for first data tick…</div>
+      )}
 
       <div className="p-4">
         {/* time range selector + chart label */}

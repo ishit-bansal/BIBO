@@ -11,8 +11,10 @@ import LiveTicker from './components/LiveTicker';
 import LoginPage from './components/LoginPage';
 import UserManagement from './components/UserManagement';
 import BoSprite from './components/BoSprite';
+import ChatBot from './components/ChatBot';
 import { useLiveData } from './hooks/useLiveData';
 import type { AuthUser, UserRole } from './components/LoginPage';
+import type { AnalysisResult } from './services/api';
 
 const bgMusicUrl = new URL('./assets/sprites/sounds/background_sound.mp3', import.meta.url).href;
 
@@ -37,6 +39,8 @@ function App() {
   const live = useLiveData();
   const [snapInProgress, setSnapInProgress] = useState(false);
   const [snapCount, setSnapCount] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const clearSnapRef = useRef(live.clearSnap);
   clearSnapRef.current = live.clearSnap;
 
@@ -114,7 +118,15 @@ function App() {
         snapTriggered={snapInProgress}
         onSnapComplete={handleSnapComplete}
         visible={isMainDashboard}
+        onClick={() => setChatOpen(prev => !prev)}
       />
+      {isMainDashboard && (
+        <ChatBot
+          open={chatOpen}
+          onClose={() => setChatOpen(false)}
+          analysisResult={analysisResult}
+        />
+      )}
       <header className="app-title-bar border-b border-gray-800 px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
@@ -194,7 +206,7 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-6">
-        {activeTab === 'analyze' && <CSVUpload snapCount={snapCount} />}
+        {activeTab === 'analyze' && <CSVUpload snapCount={snapCount} onAnalysisChange={setAnalysisResult} />}
         {activeTab === 'dashboard' && (
           <div className="resource-hud-page space-y-6">
             <LiveTicker
