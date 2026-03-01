@@ -76,7 +76,7 @@ export default function ReportForm() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="field-report-light space-y-4">
       <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">Submit Field Report</h2>
@@ -89,7 +89,7 @@ export default function ReportForm() {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="field-report-light space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-sm text-gray-400">Agent Alias</label>

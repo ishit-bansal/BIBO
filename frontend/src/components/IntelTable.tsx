@@ -86,55 +86,50 @@ function highlightReplacements(text: string): React.JSX.Element {
 function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative mx-4 max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-xl border border-gray-700 bg-[#0d1220] shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="relative mx-4 max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-xl border border-gray-300 bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-white">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-900/50 border border-emerald-700/50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 border border-emerald-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">PII Redaction Audit Trail</h3>
+              <h3 className="text-lg font-bold text-gray-900">PII Redaction Audit Trail</h3>
               <span className="text-xs text-gray-500 font-mono">Report {log.report_id}</span>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
-        <div className="overflow-y-auto p-6 space-y-5" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+        <div className="overflow-y-auto p-6 space-y-5 bg-white" style={{ maxHeight: 'calc(90vh - 80px)' }}>
 
           {/* Pipeline Flow Visualization */}
-          <div className="rounded-lg border border-gray-800 bg-gray-900/40 p-4">
+          <div className="rounded-lg border border-gray-300 bg-gray-50 p-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Security Pipeline</h4>
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/60 px-3 py-2">
-                <span className="text-sm">📝</span>
-                <span className="text-xs font-semibold text-gray-300">Raw Report</span>
+              <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2">
+                <span className="text-xs font-semibold text-gray-700">Raw Report</span>
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-              <div className="flex items-center gap-2 rounded-lg border border-red-800/50 bg-red-950/30 px-3 py-2">
-                <span className="text-sm">🛡️</span>
-                <span className="text-xs font-semibold text-red-400">PII Redaction</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+              <div className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2">
+                <span className="text-xs font-semibold text-red-600">PII Redaction</span>
                 {log.redactions_applied.length > 0 && (
                   <span className="rounded-full bg-red-600 px-1.5 py-0.5 text-[9px] font-bold text-white">{log.redactions_applied.length}</span>
                 )}
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-800/50 bg-emerald-950/30 px-3 py-2">
-                <span className="text-sm">🔒</span>
-                <span className="text-xs font-semibold text-emerald-400">Safe Text</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2">
+                <span className="text-xs font-semibold text-emerald-700">Safe Text</span>
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-              <div className="flex items-center gap-2 rounded-lg border border-purple-800/50 bg-purple-950/30 px-3 py-2">
-                <span className="text-sm">🤖</span>
-                <span className="text-xs font-semibold text-purple-400">Gemini LLM</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+              <div className="flex items-center gap-2 rounded-lg border border-purple-300 bg-purple-50 px-3 py-2">
+                <span className="text-xs font-semibold text-purple-700">Gemini LLM</span>
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-              <div className="flex items-center gap-2 rounded-lg border border-blue-800/50 bg-blue-950/30 px-3 py-2">
-                <span className="text-sm">📊</span>
-                <span className="text-xs font-semibold text-blue-400">Structured Data</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+              <div className="flex items-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2">
+                <span className="text-xs font-semibold text-blue-700">Structured Data</span>
               </div>
             </div>
           </div>
@@ -148,23 +143,23 @@ function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () 
               </h4>
               <div className="flex flex-wrap gap-2">
                 {log.redactions_applied.map((r, i) => (
-                  <div key={i} className="rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-2 flex items-center gap-2">
-                    <span className={`text-[9px] uppercase font-bold rounded px-1.5 py-0.5 ${r.type === 'name' ? 'bg-red-600/80 text-white' : 'bg-amber-600/80 text-white'}`}>{r.type}</span>
-                    <span className="text-xs text-red-400 line-through font-mono">{r.original}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
-                    <span className="text-xs text-emerald-400 font-mono font-semibold">{r.replacement}</span>
+                  <div key={i} className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 flex items-center gap-2">
+                    <span className={`text-[9px] uppercase font-bold rounded px-1.5 py-0.5 ${r.type === 'name' ? 'bg-red-600 text-white' : 'bg-amber-600 text-white'}`}>{r.type}</span>
+                    <span className="text-xs text-red-600 line-through font-mono">{r.original}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                    <span className="text-xs text-emerald-600 font-mono font-semibold">{r.replacement}</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-emerald-800/30 bg-emerald-950/20 p-4 flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/50">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400"><polyline points="20 6 9 17 4 12"/></svg>
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-600"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
               <div>
-                <span className="text-sm font-semibold text-emerald-300">No PII Detected</span>
-                <p className="text-xs text-emerald-400/60">This report contained no hero names or contact numbers requiring redaction.</p>
+                <span className="text-sm font-semibold text-emerald-700">No PII Detected</span>
+                <p className="text-xs text-emerald-600">This report contained no hero names or contact numbers requiring redaction.</p>
               </div>
             </div>
           )}
@@ -172,30 +167,30 @@ function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () 
           {/* Side-by-side comparison */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h4 className="text-sm font-semibold text-red-400 mb-2 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded bg-red-900/50 text-[10px] font-bold text-red-300">1</span>
+              <h4 className="text-sm font-semibold text-red-600 mb-2 flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded bg-red-100 text-[10px] font-bold text-red-600">1</span>
                 Original Text (contains PII)
               </h4>
-              <div className="rounded-lg border border-red-900/30 bg-red-950/10 p-4 text-sm text-gray-300 font-mono leading-relaxed">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-gray-800 font-mono leading-relaxed">
                 {highlightRedactions(log.original_text, log.redactions_applied)}
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-900/50 text-[10px] font-bold text-emerald-300">2</span>
+              <h4 className="text-sm font-semibold text-emerald-700 mb-2 flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-100 text-[10px] font-bold text-emerald-700">2</span>
                 Redacted Text (sent to Gemini)
               </h4>
-              <div className="rounded-lg border border-emerald-900/30 bg-emerald-950/10 p-4 text-sm text-gray-300 font-mono leading-relaxed">
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-gray-800 font-mono leading-relaxed">
                 {highlightReplacements(log.redacted_text)}
               </div>
             </div>
           </div>
 
           {/* Proof stamp */}
-          <div className="rounded-lg border border-gray-800 bg-gray-900/30 px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              <span className="text-emerald-400 font-semibold">VERIFIED:</span>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span className="text-emerald-700 font-semibold">VERIFIED:</span>
               <span>No PII was transmitted to the external LLM. All hero identities and contact info were stripped server-side before API call.</span>
             </div>
           </div>
@@ -205,7 +200,7 @@ function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () 
   );
 }
 
-export default function IntelTable() {
+export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
   const [reports, setReports] = useState<IntelReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -312,17 +307,17 @@ export default function IntelTable() {
       </div>
 
       {/* Main table card */}
-      <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-5">
+      <div className="intel-grid-white-panel rounded-lg border border-gray-300 bg-white p-5">
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold text-white">Intelligence Feed</h2>
-          <span className="rounded bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+          <span className="rounded bg-white border border-gray-300 px-2 py-0.5 text-xs text-gray-700">
             {filtered.length} reports
           </span>
           <div className="ml-auto flex gap-2">
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="rounded border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm text-gray-200"
+              className="intel-feed-dropdown rounded border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm text-gray-200"
             >
               <option value="all">All Reports</option>
               <option value="processed">Processed</option>
@@ -369,10 +364,10 @@ export default function IntelTable() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="intel-grid-white overflow-x-auto bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-gray-300 bg-white">
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Priority</th>
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Agent</th>
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Location</th>
@@ -381,14 +376,14 @@ export default function IntelTable() {
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Urgency</th>
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Action</th>
                 <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-400">Time</th>
-                <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-400">PII Audit</th>
+                {isAdmin && <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-400">PII Audit</th>}
               </tr>
             </thead>
             <tbody>
               {filtered.map((report) => (
                 <React.Fragment key={report.id}>
                   <tr
-                    className={`border-b border-gray-800/50 cursor-pointer transition-colors ${expandedRow === report.report_id ? 'bg-gray-800/40' : 'hover:bg-gray-800/20'}`}
+                    className={`border-b border-gray-200 cursor-pointer transition-colors ${expandedRow === report.report_id ? 'bg-white' : 'hover:bg-gray-50'}`}
                     onClick={() => setExpandedRow(prev => prev === report.report_id ? null : report.report_id)}
                   >
                     <td className="px-3 py-2.5">
@@ -423,39 +418,41 @@ export default function IntelTable() {
                     <td className="whitespace-nowrap px-3 py-2.5 text-xs text-gray-500">
                       {new Date(report.timestamp).toLocaleString()}
                     </td>
-                    <td className="px-3 py-2.5 text-center" onClick={e => e.stopPropagation()}>
-                      {report.processed ? (
-                        <button
-                          onClick={() => openAudit(report)}
-                          disabled={auditLoading === report.report_id}
-                          className="inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-semibold bg-emerald-900/30 text-emerald-400 border border-emerald-800/40 hover:bg-emerald-800/40 transition-colors disabled:opacity-40"
-                          title="View PII redaction audit"
-                        >
-                          {auditLoading === report.report_id ? (
-                            <span className="animate-spin">⟳</span>
-                          ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                          )}
-                          Audit
-                        </button>
-                      ) : (
-                        <span className="text-[10px] text-gray-600">—</span>
-                      )}
-                    </td>
+                    {isAdmin && (
+                      <td className="px-3 py-2.5 text-center" onClick={e => e.stopPropagation()}>
+                        {report.processed ? (
+                          <button
+                            onClick={() => openAudit(report)}
+                            disabled={auditLoading === report.report_id}
+                            className="inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300 hover:bg-emerald-200 transition-colors disabled:opacity-40"
+                            title="View PII redaction audit"
+                          >
+                            {auditLoading === report.report_id ? (
+                              <span className="animate-spin">&#8635;</span>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            )}
+                            Audit
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-gray-600">&mdash;</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                   {expandedRow === report.report_id && (
-                    <tr className="border-b border-gray-800/50">
-                      <td colSpan={9} className="px-3 py-3 bg-gray-900/30">
+                    <tr className="border-b border-gray-200">
+                      <td colSpan={isAdmin ? 9 : 8} className="px-3 py-3 bg-white">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <span className="text-[10px] uppercase text-gray-500 font-semibold">Raw Report Text</span>
-                            <p className="mt-1 text-xs text-gray-300 font-mono leading-relaxed bg-gray-800/40 rounded p-2.5">
+                            <p className="mt-1 text-xs text-gray-700 font-mono leading-relaxed bg-white border border-gray-200 rounded p-2.5">
                               {report.raw_text}
                             </p>
                           </div>
                           <div>
                             <span className="text-[10px] uppercase text-gray-500 font-semibold">Redacted Text (sent to LLM)</span>
-                            <p className="mt-1 text-xs text-gray-300 font-mono leading-relaxed bg-gray-800/40 rounded p-2.5">
+                            <p className="mt-1 text-xs text-gray-700 font-mono leading-relaxed bg-white border border-gray-200 rounded p-2.5">
                               {report.redacted_text ?? <span className="text-gray-600 italic">Not yet processed</span>}
                             </p>
                           </div>

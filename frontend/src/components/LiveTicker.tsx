@@ -172,7 +172,7 @@ function ResourceCard({ analyticsKey, analytics, sparkData, color, short, isFocu
   return (
     <div
       onClick={onClick}
-      className={`rounded border bg-gray-900/40 p-2.5 cursor-pointer transition-all hover:border-gray-600 ${
+      className={`resource-spark-card rounded border bg-gray-900/40 p-2.5 cursor-pointer transition-all hover:border-gray-600 ${
         isDepleted ? 'border-red-900/50' : isFocused ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-gray-800'
       }`}
     >
@@ -400,7 +400,7 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
   return (
     <div className="rounded-lg border border-gray-700 bg-[#0d1220] overflow-hidden">
       {/* header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-800">
+      <div className="flex items-center justify-between px-4 py-2.5 border-0">
         <div className="flex items-center gap-2">
           <div className={`h-2 w-2 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
           <h2 className="font-bold text-white text-sm tracking-wide">LIVE FEED</h2>
@@ -416,7 +416,7 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
       </div>
 
       {/* ticker tape */}
-      <div className="flex overflow-x-auto border-b border-gray-800 bg-[#080c16]">
+      <div className="flex overflow-x-auto border-0 bg-[#080c16]">
         {RESOURCE_KEYS.map(k => {
           const a = analytics[k];
           if (!a) return null;

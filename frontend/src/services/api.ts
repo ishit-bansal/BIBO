@@ -138,6 +138,51 @@ export const uploadCSV = (file: File) => {
   ).then(r => r.data);
 };
 
+/* ── Data Analysis Lab ──────────────────────────────── */
+
+export interface AnalysisPairStats {
+  current: number;
+  min: number;
+  max: number;
+  mean: number;
+  depletion_rate: number;
+  predicted_zero: string | null;
+  hours_to_zero: number | null;
+  status: 'stable' | 'warning' | 'critical' | 'depleted';
+  data_points: number;
+  risk_score: number;
+  stock_pct: number;
+}
+
+export interface WeeklyForecastDay {
+  day: number;
+  hours: number;
+  projected_stock: number;
+  date: string;
+}
+
+export interface AnalysisPair {
+  sector_id: string;
+  resource_type: string;
+  stats: AnalysisPairStats;
+  raw: { timestamp: string; stock: number }[];
+  ma: { timestamp: string; ma_stock: number }[];
+  forecast: { timestamp: string; predicted_stock: number }[];
+  weekly_forecast: WeeklyForecastDay[];
+}
+
+export interface AnalysisResult {
+  pairs: AnalysisPair[];
+  total_records: number;
+  time_range: { start: string; end: string };
+}
+
+export const analyzeCSV = (file: File) => {
+  const form = new FormData();
+  form.append('file', file);
+  return API.post<AnalysisResult>('/api/resources/analyze', form).then(r => r.data);
+};
+
 export interface HeroWeather {
   condition: string;
   temp_c: number;
@@ -279,3 +324,28 @@ export interface SupplyOverview {
 
 export const fetchSupplyOverview = (time?: string) =>
   API.get<SupplyOverview>('/api/supply/overview', { params: time ? { time } : undefined }).then(r => r.data);
+
+// --- Auth / Face Management ---
+
+export interface FaceRecord {
+  id: string;
+  name: string;
+  role: 'admin' | 'user';
+  descriptor: number[];
+}
+
+export const fetchFaces = () =>
+  API.get<FaceRecord[]>('/api/auth/faces').then(r => r.data);
+
+export const enrollFace = (data: { name: string; role: string; descriptor: number[] }, authRole: string, authName: string) =>
+  API.post<{ status: string; id: string; name: string; role: string }>(
+    '/api/auth/faces',
+    data,
+    { headers: { 'X-Auth-Role': authRole, 'X-Auth-Name': authName } },
+  ).then(r => r.data);
+
+export const removeFace = (faceId: string, authRole: string) =>
+  API.delete<{ status: string; id: string }>(
+    `/api/auth/faces/${faceId}`,
+    { headers: { 'X-Auth-Role': authRole } },
+  ).then(r => r.data);

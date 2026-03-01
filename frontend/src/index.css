@@ -24,11 +24,25 @@
 :root {
   --font-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-display: 'Handjet', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --sprite-basic-container: url("./assets/sprites/environment/basic_container_shaded.png");
+  --sprite-rounded-border: url("./assets/sprites/environment/div_rounded_border.png?v=3");
+  --sprite-flex-item: url("./assets/sprites/environment/div_flex_items.png");
+  --sprite-flex-overflow: url("./assets/sprites/environment/div_flex_overflow.png");
+  --sprite-button: url("./assets/sprites/environment/buttons.png");
+  --sprite-title-button: url("./assets/sprites/environment/title_buttons.png");
+  --sprite-background: url("./assets/sprites/environment/background.png");
+  --sprite-title-bar: url("./assets/sprites/environment/title_bar.png");
+  --sprite-background-scale: 320px 320px;
+  --sprite-slice: 8;
 }
 
 body {
   margin: 0;
-  background-color: #0a0e1a;
+  background-color: #517fff;
+  background-image: var(--sprite-background);
+  background-repeat: repeat;
+  background-size: var(--sprite-background-scale);
+  image-rendering: pixelated;
   color: #e0e6ed;
   font-family: var(--font-display);
   font-size: 18px;
@@ -68,4 +82,582 @@ body {
 
 .text-\[11px\] {
   font-size: 1rem !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* 9-slice: primary large containers */
+.pixel-panel,
+[class*="rounded"][class*="border"][class*="bg-[#0d1220]"],
+[class*="rounded"][class*="border"][class*="bg-[#0f1729]"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-basic-container) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* 9-slice: large bordered boxes default to basic_container_shaded */
+[class*="rounded"][class*="border"][class*=" p-4"],
+[class*="rounded"][class*="border"][class*=" p-5"],
+[class*="rounded"][class*="border"][class*=" p-6"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-basic-container) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* 9-slice: rounded-border sprite only for compact cards */
+[class*="rounded"][class*="border"][class*="bg-gray-900/40"][class*="p-2.5"],
+[class*="rounded"][class*="border"][class*="bg-gray-900/50"][class*="p-3"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-rounded-border) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* 9-slice: flex-item style cards/chips */
+[class*="flex"][class*="rounded"][class*="border"][class*="bg-gray-9"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-flex-item) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+}
+
+/* 9-slice: overflow regions (tables, scrollers, clipped panels) */
+[class*="overflow-x-auto"],
+[class*="overflow-y-auto"],
+[class*="overflow-hidden"] {
+  border-style: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-flex-overflow) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 0 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 9-slice: buttons */
+button.rounded,
+button[class*="rounded"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-button) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* White panel readability: shift light text to dark tones inside skinned containers only. */
+.pixel-panel :is(.text-white, .text-gray-100, .text-gray-200, .text-gray-300),
+[class*="rounded"][class*="border"][class*="bg-[#0d1220]"] :is(.text-white, .text-gray-100, .text-gray-200, .text-gray-300),
+[class*="rounded"][class*="border"][class*="bg-[#0f1729]"] :is(.text-white, .text-gray-100, .text-gray-200, .text-gray-300),
+[class*="rounded"][class*="border"][class*=" p-4"] :is(.text-white, .text-gray-100, .text-gray-200, .text-gray-300),
+[class*="rounded"][class*="border"][class*=" p-5"] :is(.text-white, .text-gray-100, .text-gray-200, .text-gray-300),
+[class*="rounded"][class*="border"][class*=" p-6"] :is(.text-white, .text-gray-100, .text-gray-200, .text-gray-300) {
+  color: #111111 !important;
+}
+
+.pixel-panel :is(.text-gray-400, .text-gray-500, .text-gray-600),
+[class*="rounded"][class*="border"][class*="bg-[#0d1220]"] :is(.text-gray-400, .text-gray-500, .text-gray-600),
+[class*="rounded"][class*="border"][class*="bg-[#0f1729]"] :is(.text-gray-400, .text-gray-500, .text-gray-600),
+[class*="rounded"][class*="border"][class*=" p-4"] :is(.text-gray-400, .text-gray-500, .text-gray-600),
+[class*="rounded"][class*="border"][class*=" p-5"] :is(.text-gray-400, .text-gray-500, .text-gray-600),
+[class*="rounded"][class*="border"][class*=" p-6"] :is(.text-gray-400, .text-gray-500, .text-gray-600) {
+  color: #2b2b2b !important;
+}
+
+/* Keep top navigation tab labels white in all states. */
+.top-nav-tab,
+.top-nav-tab:hover,
+.top-nav-tab:focus,
+.top-nav-tab:active {
+  color: #ffffff !important;
+}
+
+/* Force specific panels to use basic_container_shaded regardless of generic p-* sprite rules. */
+.basic-container-shaded {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-basic-container) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* Explicit sprite mapping for the resource spark cards in LiveTicker. */
+.resource-spark-card {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-rounded-border) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* Match rounded-lg bordered containers to the rounded-border sprite. */
+[class*="rounded-lg"][class*="border"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-rounded-border) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* Ensure explicit basic container class always wins over generic rounded-lg mapping. */
+.basic-container-shaded,
+.basic-container-shaded[class*="rounded-lg"][class*="border"] {
+  border-image-source: var(--sprite-basic-container) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+}
+
+/* Resource HUD readability upscale (dashboard tab only). */
+.resource-hud-page {
+  font-size: 1.18rem;
+  font-weight: 560;
+}
+
+.resource-hud-page .text-\[9px\] {
+  font-size: 1.08rem !important;
+}
+
+.resource-hud-page .text-\[10px\] {
+  font-size: 1.14rem !important;
+}
+
+.resource-hud-page .text-\[11px\] {
+  font-size: 1.18rem !important;
+}
+
+.resource-hud-page .text-xs {
+  font-size: 1.15rem !important;
+  line-height: 1.25 !important;
+}
+
+.resource-hud-page .text-sm {
+  font-size: 1.25rem !important;
+  line-height: 1.25 !important;
+}
+
+.resource-hud-page .text-lg {
+  font-size: 1.7rem !important;
+  line-height: 1.2 !important;
+}
+
+.resource-hud-page .font-normal {
+  font-weight: 560 !important;
+}
+
+.resource-hud-page .font-medium {
+  font-weight: 560 !important;
+}
+
+.resource-hud-page .font-semibold {
+  font-weight: 640 !important;
+}
+
+.resource-hud-page .font-bold {
+  font-weight: 700 !important;
+}
+
+.resource-hud-page [class*="p-2.5"] {
+  padding: 0.9rem !important;
+}
+
+.resource-hud-page [class*="p-3"] {
+  padding: 1rem !important;
+}
+
+.resource-hud-page [class*="p-4"] {
+  padding: 1.15rem !important;
+}
+
+/* Darker reds for HUD readability. */
+.resource-hud-page .text-red-300 {
+  color: #b91c1c !important;
+}
+
+.resource-hud-page .text-red-400 {
+  color: #991b1b !important;
+}
+
+.resource-hud-page .text-red-500 {
+  color: #7f1d1d !important;
+}
+
+.resource-hud-page .border-red-900\/50 {
+  border-color: rgba(127, 29, 29, 0.65) !important;
+}
+
+/* Darker greens for HUD readability. */
+.resource-hud-page .text-emerald-300 {
+  color: #15803d !important;
+}
+
+.resource-hud-page .text-emerald-400 {
+  color: #166534 !important;
+}
+
+.resource-hud-page .text-emerald-500 {
+  color: #14532d !important;
+}
+
+.resource-hud-page .border-emerald-500 {
+  border-color: #166534 !important;
+}
+
+/* Tactical Map readability upscale. */
+.tactical-map-xl {
+  font-size: 1.12rem;
+}
+
+.tactical-map-xl .text-\[9px\] {
+  font-size: 1rem !important;
+}
+
+.tactical-map-xl .text-\[10px\] {
+  font-size: 1.08rem !important;
+}
+
+.tactical-map-xl .text-xs {
+  font-size: 1.08rem !important;
+}
+
+.tactical-map-xl .text-sm {
+  font-size: 1.18rem !important;
+}
+
+.tactical-map-xl .text-lg {
+  font-size: 1.5rem !important;
+}
+
+.tactical-map-xl .h-2.w-2 {
+  height: 0.65rem !important;
+  width: 0.65rem !important;
+}
+
+.tactical-map-xl button {
+  min-height: 2.25rem;
+}
+
+.tactical-map-xl .custom-scrollbar {
+  scrollbar-color: #94a3b8 #ffffff;
+  background-color: #ffffff !important;
+}
+
+.tactical-map-xl .custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.tactical-map-xl .custom-scrollbar::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+.tactical-map-xl .custom-scrollbar::-webkit-scrollbar-corner {
+  background: #ffffff;
+}
+
+.tactical-map-xl .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+}
+
+.supply-map-light .custom-scrollbar {
+  scrollbar-color: #94a3b8 #ffffff;
+  background-color: #ffffff !important;
+}
+
+.supply-map-light .custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.supply-map-light .custom-scrollbar::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+.supply-map-light .custom-scrollbar::-webkit-scrollbar-corner {
+  background: #ffffff;
+}
+
+.supply-map-light .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+}
+
+/* Intelligence Feed: force true white table/grid surfaces (override sprite globals). */
+.intel-grid-white-panel {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  border-image: none !important;
+  border-image-source: none !important;
+}
+
+.intel-grid-white,
+.intel-grid-white table,
+.intel-grid-white thead,
+.intel-grid-white tbody,
+.intel-grid-white tr,
+.intel-grid-white th,
+.intel-grid-white td {
+  background: #ffffff !important;
+}
+
+.intel-grid-white tr {
+  border-color: #e5e7eb !important;
+}
+
+/* Intelligence Feed dropdown: use button sprite styling. */
+.intel-feed-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-button) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  padding-right: 2rem !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* Field Report light mode */
+.field-report-light [class*="bg-[#0d1220]"],
+.field-report-light [class*="bg-gray-900"],
+.field-report-light [class*="bg-gray-900/"],
+.field-report-light [class*="bg-gray-800"],
+.field-report-light [class*="bg-gray-800/"] {
+  background-color: #ffffff !important;
+}
+
+.field-report-light [class*="border-gray-800"],
+.field-report-light [class*="border-gray-700"] {
+  border-color: #d1d5db !important;
+}
+
+.field-report-light .text-white,
+.field-report-light .text-gray-200,
+.field-report-light .text-gray-300,
+.field-report-light .text-gray-400,
+.field-report-light .text-gray-500,
+.field-report-light .text-gray-600 {
+  color: #111827 !important;
+}
+
+.field-report-light input,
+.field-report-light select,
+.field-report-light textarea {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.field-report-light input::placeholder,
+.field-report-light textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+
+.app-title-bar {
+  background-image: var(--sprite-title-bar);
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  background-position: top left;
+  image-rendering: pixelated;
+}
+
+.app-title-bar .top-nav-tab {
+  border-image-source: var(--sprite-title-button) !important;
+}
+
+.title-logo {
+  display: block;
+  height: 68px;
+  width: auto;
+  image-rendering: pixelated;
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.title-logo:hover {
+  transform: scale(1.08);
+}
+
+/* Make mission popup sprite frame more visible without scaling inner UI. */
+.mission-popup-shell {
+  border-width: 12px !important;
+  border-image-width: 12 !important;
+}
+
+/* Stat chips like "text-center px-3 py-1 rounded ..." should use button sprite too. */
+[class*="text-center"][class*="px-3"][class*="py-1"][class*="rounded"][class*="bg-gray-900/60"][class*="border"][class*="border-gray-800"],
+[class*="text-center"][class*="px-3"][class*="py-1"][class*="rounded"][class*="bg-white"][class*="border"][class*="border-gray-300"] {
+  border-style: solid !important;
+  border-width: 8px !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  border-image-source: var(--sprite-button) !important;
+  border-image-slice: var(--sprite-slice) fill !important;
+  border-image-width: 8 !important;
+  border-image-repeat: stretch !important;
+  background-color: transparent !important;
+  image-rendering: pixelated;
+  box-shadow: none !important;
+}
+
+/* UI Polish v1 (revertable): remove `ui-polish-v1` from App root to disable all below. */
+.ui-polish-v1 {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ui-polish-v1 .app-title-bar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.16);
+}
+
+.ui-polish-v1 main {
+  padding-top: 1.25rem;
+  padding-bottom: 2rem;
+}
+
+.ui-polish-v1 .resource-hud-page,
+.ui-polish-v1 .tactical-map-xl,
+.ui-polish-v1 .supply-map-light,
+.ui-polish-v1 .field-report-light,
+.ui-polish-v1 .intel-grid-white-panel {
+  row-gap: 1rem;
+}
+
+.ui-polish-v1 .top-nav-tab {
+  min-height: 2.6rem;
+  letter-spacing: 0.02em;
+}
+
+.ui-polish-v1 .title-logo {
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.25));
+}
+
+.ui-polish-v1 button,
+.ui-polish-v1 [role="button"],
+.ui-polish-v1 .cursor-pointer {
+  transition: transform 140ms ease, filter 160ms ease, background-color 160ms ease;
+}
+
+.ui-polish-v1 button:hover,
+.ui-polish-v1 [role="button"]:hover,
+.ui-polish-v1 .cursor-pointer:hover {
+  filter: saturate(1.02);
+}
+
+.ui-polish-v1 .intel-grid-white tbody tr:nth-child(even) {
+  background: #f8fafc !important;
+}
+
+.ui-polish-v1 .intel-grid-white tbody tr:hover {
+  background: #f1f5f9 !important;
+}
+
+.ui-polish-v1 .field-report-light input:focus,
+.ui-polish-v1 .field-report-light select:focus,
+.ui-polish-v1 .field-report-light textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.ui-polish-v1 .tactical-map-xl .leaflet-container,
+.ui-polish-v1 .supply-map-light .leaflet-container {
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.28);
+}
+
+/* Login page: inherit the site's pixel-art tiled background. */
+.login-page-themed {
+  background-color: #517fff;
+  background-image: var(--sprite-background);
+  background-repeat: repeat;
+  background-size: var(--sprite-background-scale);
+  image-rendering: pixelated;
+}
+
+.login-page-themed .login-card {
+  border-image: none !important;
+  border-image-source: none !important;
+  background-color: #ffffff !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Supply Chain dropdown panel styling */
+.sc-dropdown-panel {
+  border-image: none !important;
+  border-image-source: none !important;
 }

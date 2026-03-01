@@ -56,7 +56,7 @@ export default function SectorHeatmap({ analytics }: Props) {
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-5">
+      <div className="basic-container-shaded rounded-lg border border-gray-800 bg-[#0d1220] p-5">
         <div className="h-8 w-48 bg-gray-800 rounded animate-pulse mb-4" />
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
@@ -68,7 +68,7 @@ export default function SectorHeatmap({ analytics }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-5">
+    <div className="basic-container-shaded rounded-lg border border-gray-800 bg-[#0d1220] p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-bold text-white tracking-wide">SECTOR RESOURCE STATUS</h2>
         <div className="flex items-center gap-3 text-[9px] text-gray-500">

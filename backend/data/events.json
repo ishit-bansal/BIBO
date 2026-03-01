@@ -6,7 +6,7 @@
     "type": "dimensional_rift",
     "severity": "critical",
     "title": "Dimensional Rift — Expanding",
-    "description": "Reality tear detected in Old Sokovia city center. Rift expanding at 0.3m/min. Scarlet Witch containing. Immediate backup may be required.",
+    "description": "Reality tear detected in Old Sokovia city center. Rift expanding at 0.3m/min. Batman containing. Immediate backup may be required.",
     "timestamp": "2026-01-16T01:15:00Z",
     "active": true
   },
@@ -17,7 +17,7 @@
     "type": "hostile_incursion",
     "severity": "high",
     "title": "Eastern Mine — Hostile Incursion",
-    "description": "Armed hostiles breached vibranium mine perimeter. Black Panther and Dora Milaje responding. 4 contacts, 2 neutralized.",
+    "description": "Armed hostiles breached vibranium mine perimeter. Hulk responding. 4 contacts, 2 neutralized.",
     "timestamp": "2026-01-16T00:30:00Z",
     "active": true
   },
@@ -39,7 +39,7 @@
     "type": "multiversal_breach",
     "severity": "medium",
     "title": "Minor Dimensional Breach Sealed",
-    "description": "Incursion point from dimension 616-B detected and sealed by Doctor Strange. Monitoring for recurrence.",
+    "description": "Incursion point from dimension 616-B detected and sealed by Spiderman. Monitoring for recurrence.",
     "timestamp": "2026-01-15T22:14:00Z",
     "active": false
   },
