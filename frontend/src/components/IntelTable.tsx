@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { fetchReports, batchProcessReports, fetchRedactionLog } from '../services/api';
 import type { IntelReport, RedactionLog } from '../services/api';
 
@@ -15,7 +15,7 @@ const PRIORITY_COLORS: Record<string, string> = {
   'Routine': 'bg-gray-700/50 text-gray-300',
 };
 
-function highlightRedactions(text: string, redactions: { type: string; original: string; replacement: string }[]): JSX.Element {
+function highlightRedactions(text: string, redactions: { type: string; original: string; replacement: string }[]): React.JSX.Element {
   if (!redactions.length) return <>{text}</>;
 
   const sortedRedactions = [...redactions].sort((a, b) => {
@@ -24,7 +24,7 @@ function highlightRedactions(text: string, redactions: { type: string; original:
     return posA - posB;
   });
 
-  const parts: JSX.Element[] = [];
+  const parts: React.JSX.Element[] = [];
   let remaining = text;
   let keyIdx = 0;
 
@@ -57,9 +57,9 @@ function highlightRedactions(text: string, redactions: { type: string; original:
   return <>{parts}</>;
 }
 
-function highlightReplacements(text: string): JSX.Element {
+function highlightReplacements(text: string): React.JSX.Element {
   const regex = /\[REDACTED_(?:NAME|CONTACT)\]/g;
-  const parts: JSX.Element[] = [];
+  const parts: React.JSX.Element[] = [];
   let lastIdx = 0;
   let match;
   let keyIdx = 0;
@@ -386,9 +386,8 @@ export default function IntelTable() {
             </thead>
             <tbody>
               {filtered.map((report) => (
-                <>
+                <React.Fragment key={report.id}>
                   <tr
-                    key={report.id}
                     className={`border-b border-gray-800/50 cursor-pointer transition-colors ${expandedRow === report.report_id ? 'bg-gray-800/40' : 'hover:bg-gray-800/20'}`}
                     onClick={() => setExpandedRow(prev => prev === report.report_id ? null : report.report_id)}
                   >
@@ -444,9 +443,8 @@ export default function IntelTable() {
                       )}
                     </td>
                   </tr>
-                  {/* Expanded row showing raw text */}
                   {expandedRow === report.report_id && (
-                    <tr key={`${report.id}-expanded`} className="border-b border-gray-800/50">
+                    <tr className="border-b border-gray-800/50">
                       <td colSpan={9} className="px-3 py-3 bg-gray-900/30">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
@@ -465,7 +463,7 @@ export default function IntelTable() {
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
