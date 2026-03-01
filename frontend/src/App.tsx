@@ -106,14 +106,14 @@ function App() {
     </button>
   );
 
-  const isDashboard = activeTab === 'analyze' || activeTab === 'dashboard';
+  const isMainDashboard = activeTab === 'analyze';
 
   return (
     <div className="ui-polish-v1 min-h-screen bg-transparent text-gray-200">
       <BoSprite
         snapTriggered={snapInProgress}
         onSnapComplete={handleSnapComplete}
-        visible={isDashboard}
+        visible={isMainDashboard}
       />
       <header className="app-title-bar border-b border-gray-800 px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">

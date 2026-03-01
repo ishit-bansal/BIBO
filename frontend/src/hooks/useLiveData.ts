@@ -96,7 +96,6 @@ export function useLiveData() {
         setProgress(Math.round((msg.tick_index / msg.total_ticks) * 100));
       } else if (msg.type === 'snap_event') {
         setSnapEvent(msg as SnapEvent);
-        reloadTimeline();
       }
     };
   }, [reloadTimeline]);

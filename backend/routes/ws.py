@@ -1,12 +1,9 @@
 """WebSocket + simulation control endpoints."""
 
 import asyncio
-import random
 from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
-from db.database import SessionLocal
-from db.models import ResourceLog
 from services.simulator import simulator
 
 router = APIRouter(tags=["WebSocket"])
@@ -52,41 +49,19 @@ async def sim_seek(
 
 @router.post("/api/sim/snap")
 async def execute_snap():
-    """THE SNAP: randomly delete ~50% of resource_logs, reload timeline, broadcast event.
+    """THE SNAP: broadcast a snap event to all connected clients.
+
+    Does NOT modify any database — the frontend handles halving
+    the user-uploaded CSV data in-memory.
 
     Usage:
       curl -X POST http://localhost:8000/api/sim/snap
     """
-    db = SessionLocal()
-    try:
-        all_ids = [r[0] for r in db.query(ResourceLog.id).all()]
-        before_count = len(all_ids)
-
-        random.shuffle(all_ids)
-        to_delete = all_ids[: len(all_ids) // 2]
-
-        if to_delete:
-            db.query(ResourceLog).filter(ResourceLog.id.in_(to_delete)).delete(
-                synchronize_session=False
-            )
-            db.commit()
-
-        after_count = before_count - len(to_delete)
-    finally:
-        db.close()
-
-    simulator._load_timeline()
-
     await simulator._broadcast({
         "type": "snap_event",
-        "deleted": len(to_delete),
-        "remaining": after_count,
-        "message": "The Snap has been executed. Half the data has been erased.",
+        "deleted": 0,
+        "remaining": 0,
+        "message": "The Snap has been executed. Half the uploaded data has been erased.",
     })
 
-    return {
-        "status": "snapped",
-        "before": before_count,
-        "deleted": len(to_delete),
-        "remaining": after_count,
-    }
+    return {"status": "snapped"}
