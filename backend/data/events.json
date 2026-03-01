@@ -1,0 +1,57 @@
+[
+  {
+    "id": "evt-001",
+    "sector_id": "Sokovia",
+    "coords": [43.86, 20.46],
+    "type": "dimensional_rift",
+    "severity": "critical",
+    "title": "Dimensional Rift — Expanding",
+    "description": "Reality tear detected in Old Sokovia city center. Rift expanding at 0.3m/min. Scarlet Witch containing. Immediate backup may be required.",
+    "timestamp": "2026-01-16T01:15:00Z",
+    "active": true
+  },
+  {
+    "id": "evt-002",
+    "sector_id": "Wakanda",
+    "coords": [-1.27, 29.21],
+    "type": "hostile_incursion",
+    "severity": "high",
+    "title": "Eastern Mine — Hostile Incursion",
+    "description": "Armed hostiles breached vibranium mine perimeter. Black Panther and Dora Milaje responding. 4 contacts, 2 neutralized.",
+    "timestamp": "2026-01-16T00:30:00Z",
+    "active": true
+  },
+  {
+    "id": "evt-003",
+    "sector_id": "New Asgard",
+    "coords": [63.42, 10.38],
+    "type": "surveillance",
+    "severity": "medium",
+    "title": "Unauthorized Drone Activity",
+    "description": "Two reconnaissance drones intercepted at northern perimeter. Origin unknown. Analyzing wreckage for tech signatures.",
+    "timestamp": "2026-01-16T05:22:00Z",
+    "active": false
+  },
+  {
+    "id": "evt-004",
+    "sector_id": "Sanctum Sanctorum",
+    "coords": [40.7310, -73.9975],
+    "type": "multiversal_breach",
+    "severity": "medium",
+    "title": "Minor Dimensional Breach Sealed",
+    "description": "Incursion point from dimension 616-B detected and sealed by Doctor Strange. Monitoring for recurrence.",
+    "timestamp": "2026-01-15T22:14:00Z",
+    "active": false
+  },
+  {
+    "id": "evt-005",
+    "sector_id": "Avengers Compound",
+    "coords": [41.16, -73.77],
+    "type": "logistics",
+    "severity": "low",
+    "title": "Supply Drop Completed",
+    "description": "Emergency medical and munitions resupply delivered to Wakanda via Quinjet. ETA confirmed.",
+    "timestamp": "2026-01-16T03:00:00Z",
+    "active": false
+  }
+]

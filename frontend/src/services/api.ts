@@ -109,6 +109,16 @@ export const fetchTrendLine = (sector: string, resourceType: string) =>
     `/api/predictions/${encodeURIComponent(sector)}/${encodeURIComponent(resourceType)}/trend`
   ).then(r => r.data);
 
+export interface TimelinePoint {
+  timestamp: string;
+  tick_index: number;
+  total_ticks: number;
+  analytics: Record<string, { avg_stock: number; avg_usage: number }>;
+}
+
+export const fetchTimeline = () =>
+  API.get<TimelinePoint[]>('/api/resources/timeline').then(r => r.data);
+
 export const uploadCSV = (file: File) => {
   const form = new FormData();
   form.append('file', file);
@@ -117,3 +127,66 @@ export const uploadCSV = (file: File) => {
     form
   ).then(r => r.data);
 };
+
+export interface HeroWeather {
+  condition: string;
+  temp_c: number;
+  wind_kph: number;
+  icon: string;
+}
+
+export interface HeroVitals {
+  heart_rate: number;
+  energy_reserves: number;
+  shield_integrity: number;
+}
+
+export interface Hero {
+  id: string;
+  name: string;
+  alias: string;
+  avatar: string;
+  sector_id: string;
+  coords: [number, number];
+  health: number;
+  power_level: number;
+  status: 'active' | 'engaged' | 'standby' | 'critical';
+  mission: string;
+  mission_start: string;
+  comms: string;
+  weather: HeroWeather;
+  vitals: HeroVitals;
+  recent_activity: string;
+}
+
+export interface SectorEvent {
+  id: string;
+  sector_id: string;
+  coords: [number, number];
+  type: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  timestamp: string;
+  active: boolean;
+}
+
+export interface SectorSummary {
+  sector_id: string;
+  coords: [number, number];
+  heroes: Hero[];
+  hero_count: number;
+  avg_health: number;
+  weather: HeroWeather;
+  threat_level: 'critical' | 'high' | 'medium' | 'stable';
+  active_events: SectorEvent[];
+}
+
+export const fetchHeroes = () =>
+  API.get<Hero[]>('/api/heroes').then(r => r.data);
+
+export const fetchHeroEvents = () =>
+  API.get<SectorEvent[]>('/api/heroes/events').then(r => r.data);
+
+export const fetchSectorSummaries = () =>
+  API.get<SectorSummary[]>('/api/heroes/sectors').then(r => r.data);

@@ -88,6 +88,53 @@ def get_resources(
     return query.offset(offset).limit(limit).all()
 
 
+@router.get("/timeline")
+def get_timeline(db: Session = Depends(get_db)):
+    """Full averaged timeline for every timestamp in the CSV.
+
+    Returns one entry per timestamp with avg stock/usage per sector|resource.
+    Used by the Live Feed chart to display the complete dataset from tick 0.
+    """
+    rows = (
+        db.query(
+            ResourceLog.timestamp,
+            ResourceLog.sector_id,
+            ResourceLog.resource_type,
+            func.avg(ResourceLog.stock_level).label("avg_stock"),
+            func.avg(ResourceLog.usage_rate_hourly).label("avg_usage"),
+        )
+        .group_by(ResourceLog.timestamp, ResourceLog.sector_id, ResourceLog.resource_type)
+        .order_by(ResourceLog.timestamp)
+        .all()
+    )
+
+    from collections import defaultdict
+    by_ts: dict[datetime, dict[str, dict]] = defaultdict(dict)
+    ordered_ts: list[datetime] = []
+    seen: set[datetime] = set()
+
+    for ts, sector, resource, avg_stock, avg_usage in rows:
+        key = f"{sector}|{resource}"
+        by_ts[ts][key] = {
+            "avg_stock": round(float(avg_stock), 2),
+            "avg_usage": round(float(avg_usage), 2),
+        }
+        if ts not in seen:
+            seen.add(ts)
+            ordered_ts.append(ts)
+
+    total = len(ordered_ts)
+    return [
+        {
+            "timestamp": ts.isoformat(),
+            "tick_index": i,
+            "total_ticks": total,
+            "analytics": by_ts[ts],
+        }
+        for i, ts in enumerate(ordered_ts)
+    ]
+
+
 @router.post("/upload")
 def upload_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
     """Upload new resource data via CSV file."""
