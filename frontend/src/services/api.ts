@@ -141,6 +141,19 @@ export interface HeroVitals {
   shield_integrity: number;
 }
 
+export interface HeroMission {
+  id: string;
+  name: string;
+  outcome: 'success' | 'fail';
+  duration_hours: number;
+  casualties_saved: number;
+  timestamp: string;
+  description: string;
+  sector: string;
+  mission_type: string;
+  threat: 'critical' | 'high' | 'medium' | 'low';
+}
+
 export interface Hero {
   id: string;
   name: string;
@@ -157,6 +170,7 @@ export interface Hero {
   weather: HeroWeather;
   vitals: HeroVitals;
   recent_activity: string;
+  mission_history: HeroMission[];
 }
 
 export interface SectorEvent {
@@ -182,11 +196,11 @@ export interface SectorSummary {
   active_events: SectorEvent[];
 }
 
-export const fetchHeroes = () =>
-  API.get<Hero[]>('/api/heroes').then(r => r.data);
+export const fetchHeroes = (time?: string) =>
+  API.get<Hero[]>('/api/heroes', { params: time ? { time } : undefined }).then(r => r.data);
 
 export const fetchHeroEvents = () =>
   API.get<SectorEvent[]>('/api/heroes/events').then(r => r.data);
 
-export const fetchSectorSummaries = () =>
-  API.get<SectorSummary[]>('/api/heroes/sectors').then(r => r.data);
+export const fetchSectorSummaries = (time?: string) =>
+  API.get<SectorSummary[]>('/api/heroes/sectors', { params: time ? { time } : undefined }).then(r => r.data);

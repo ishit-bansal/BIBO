@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker } from 're
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchSectorSummaries, fetchHeroEvents } from '../services/api';
-import type { SectorSummary, SectorEvent, Hero } from '../services/api';
+import type { SectorSummary, SectorEvent, Hero, HeroMission } from '../services/api';
 
 /* ── colour helpers ───────────────────────────────────── */
 
@@ -78,7 +78,7 @@ function injectCSS() {
   document.head.appendChild(style);
 }
 
-/* ── sector emoji icon builder ────────────────────────── */
+/* ── icon builders ────────────────────────────────────── */
 
 function sectorIcon(emoji: string, color: string, size: number) {
   return L.divIcon({
@@ -125,7 +125,7 @@ function FlyTo({ coords, zoom }: { coords: [number, number]; zoom: number }) {
   return null;
 }
 
-/* ── health bar inline ────────────────────────────────── */
+/* ── health bar ───────────────────────────────────────── */
 
 function HealthBar({ value, label }: { value: number; label: string }) {
   const color = value > 70 ? '#10b981' : value > 40 ? '#f59e0b' : '#ef4444';
@@ -148,6 +148,13 @@ function missionDuration(startISO: string) {
   if (hrs < 1) return '<1h';
   if (hrs < 24) return `${hrs}h`;
   return `${Math.floor(hrs / 24)}d ${hrs % 24}h`;
+}
+
+function fmtHours(h: number) {
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  const rem = h % 24;
+  return rem > 0 ? `${d}d ${rem}h` : `${d}d`;
 }
 
 /* ── hero popup card ──────────────────────────────────── */
@@ -229,7 +236,7 @@ function SectorCard({ sector }: { sector: SectorSummary }) {
 
 /* ── sidebar hero roster ──────────────────────────────── */
 
-function HeroRoster({ heroes, onSelect }: { heroes: Hero[]; onSelect: (h: Hero) => void }) {
+function HeroRoster({ heroes, selectedId, onSelect }: { heroes: Hero[]; selectedId: string | null; onSelect: (h: Hero) => void }) {
   const grouped = useMemo(() => {
     const map = new Map<string, Hero[]>();
     heroes.forEach(h => {
@@ -247,8 +254,15 @@ function HeroRoster({ heroes, onSelect }: { heroes: Hero[]; onSelect: (h: Hero) 
           <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">{sector}</div>
           {list.map(h => {
             const sc = STATUS_COLOURS[h.status];
+            const isSelected = h.id === selectedId;
             return (
-              <button key={h.id} onClick={() => onSelect(h)} className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-800/60 transition-colors text-left">
+              <button
+                key={h.id}
+                onClick={() => onSelect(h)}
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded transition-colors text-left ${
+                  isSelected ? 'bg-emerald-900/30 border border-emerald-700/50' : 'hover:bg-gray-800/60 border border-transparent'
+                }`}
+              >
                 <span className="text-base">{h.avatar}</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium text-gray-200 truncate">{h.alias}</div>
@@ -295,27 +309,236 @@ function EventFeed({ events, onFocus }: { events: SectorEvent[]; onFocus: (e: Se
   );
 }
 
+/* ── threat badge colours ─────────────────────────────── */
+
+const MISSION_THREAT_BG: Record<string, string> = {
+  critical: 'bg-red-900/50 text-red-400 border-red-700/50',
+  high: 'bg-amber-900/50 text-amber-400 border-amber-700/50',
+  medium: 'bg-blue-900/50 text-blue-400 border-blue-700/50',
+  low: 'bg-gray-800/50 text-gray-400 border-gray-600/50',
+};
+
+/* ── mission detail modal (full table like screenshot) ── */
+
+function MissionModal({ hero, onClose }: { hero: Hero; onClose: () => void }) {
+  const missions = hero.mission_history || [];
+  const sorted = [...missions].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const total = missions.length;
+  const successes = missions.filter(m => m.outcome === 'success').length;
+  const successRate = total > 0 ? ((successes / total) * 100).toFixed(1) : '0';
+  const totalDuration = missions.reduce((s, m) => s + m.duration_hours, 0);
+  const totalSaved = missions.reduce((s, m) => s + m.casualties_saved, 0);
+
+  return (
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+         onClick={onClose}>
+      <div className="w-full max-w-4xl mx-4 max-h-[85vh] flex flex-col rounded-xl border border-gray-700 bg-gradient-to-b from-[#111827] to-[#0a0e1a] shadow-2xl"
+           onClick={e => e.stopPropagation()}>
+        {/* header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span className="text-xl">{hero.avatar}</span>
+              {hero.name}&apos;s Missions
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">{total} total missions &bull; {successes} successful</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl transition-colors px-2">✕</button>
+        </div>
+
+        {/* table */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-[#111827] border-b border-gray-800 text-gray-400 uppercase tracking-wider text-[10px]">
+                <th className="text-left py-3 px-4 font-semibold">Date &amp; Time</th>
+                <th className="text-left py-3 px-3 font-semibold">Sector</th>
+                <th className="text-left py-3 px-3 font-semibold">Mission Type</th>
+                <th className="text-center py-3 px-3 font-semibold">Duration</th>
+                <th className="text-center py-3 px-3 font-semibold">Status</th>
+                <th className="text-center py-3 px-3 font-semibold">Threat</th>
+                <th className="text-right py-3 px-4 font-semibold">Lives Saved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map(m => {
+                const pass = m.outcome === 'success';
+                const dt = new Date(m.timestamp);
+                const threatCls = MISSION_THREAT_BG[m.threat] || MISSION_THREAT_BG.medium;
+                return (
+                  <tr key={m.id} className="border-b border-gray-800/40 hover:bg-gray-800/30 transition-colors">
+                    <td className="py-3 px-4 text-gray-300 whitespace-nowrap">
+                      {dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} {dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    </td>
+                    <td className="py-3 px-3 text-gray-300">{m.sector}</td>
+                    <td className="py-3 px-3 text-gray-200 font-medium">{m.mission_type}</td>
+                    <td className="py-3 px-3 text-center text-gray-300 font-mono">{fmtHours(m.duration_hours)}</td>
+                    <td className="py-3 px-3 text-center">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                        pass ? 'bg-emerald-900/50 text-emerald-400' : 'bg-red-900/50 text-red-400'
+                      }`}>
+                        {pass ? '✓' : '✗'} {pass ? 'Pass' : 'Fail'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded border text-[10px] font-semibold capitalize ${threatCls}`}>
+                        {m.threat}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-cyan-400 font-semibold">
+                      {m.casualties_saved > 0 ? m.casualties_saved.toLocaleString() : <span className="text-gray-600">0</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* summary footer */}
+        <div className="border-t border-gray-700 bg-[#0d1220] px-6 py-3 flex items-center gap-8 rounded-b-xl">
+          <div>
+            <div className="text-[9px] text-gray-500 uppercase">Total Missions</div>
+            <div className="text-lg font-bold text-cyan-400 font-mono">{total}</div>
+          </div>
+          <div>
+            <div className="text-[9px] text-gray-500 uppercase">Success Rate</div>
+            <div className={`text-lg font-bold font-mono ${Number(successRate) >= 80 ? 'text-emerald-400' : Number(successRate) >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+              {successRate}%
+            </div>
+          </div>
+          <div>
+            <div className="text-[9px] text-gray-500 uppercase">Total Duration</div>
+            <div className="text-lg font-bold text-white font-mono">{fmtHours(totalDuration)}</div>
+          </div>
+          <div>
+            <div className="text-[9px] text-gray-500 uppercase">Total Lives Saved</div>
+            <div className="text-lg font-bold text-cyan-400 font-mono">{totalSaved.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── hero detail panel (below map) — summary bar ─────── */
+
+function HeroDetailPanel({ hero, onClose }: { hero: Hero; onClose: () => void }) {
+  const [showModal, setShowModal] = useState(false);
+  const missions = hero.mission_history || [];
+  const totalMissions = missions.length;
+  const successes = missions.filter(m => m.outcome === 'success').length;
+  const successRate = totalMissions > 0 ? Math.round((successes / totalMissions) * 100) : 0;
+  const avgDuration = totalMissions > 0 ? Math.round(missions.reduce((s, m) => s + m.duration_hours, 0) / totalMissions) : 0;
+  const totalSaved = missions.reduce((s, m) => s + m.casualties_saved, 0);
+
+  const sc = STATUS_COLOURS[hero.status] || '#6b7280';
+
+  return (
+    <>
+      <div className="border-t border-gray-700 bg-[#0a0e1a]">
+        <div
+          onClick={() => setShowModal(true)}
+          className="w-full flex items-center gap-4 px-5 py-3 hover:bg-gray-800/30 transition-colors text-left cursor-pointer group"
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => { if (e.key === 'Enter') setShowModal(true); }}
+        >
+          <span className="text-2xl">{hero.avatar}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white">{hero.alias}</span>
+              <span className="text-[10px] text-gray-500">{hero.name}</span>
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${sc}22`, color: sc, border: `1px solid ${sc}` }}>
+                {hero.status.toUpperCase()}
+              </span>
+            </div>
+            <div className="text-[10px] text-gray-500 mt-0.5 group-hover:text-gray-400 transition-colors">
+              {hero.sector_id} — Click to view mission history
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <div className="text-center px-3 py-1 rounded bg-gray-900/60 border border-gray-800">
+              <div className="text-lg font-bold font-mono text-white">{totalMissions}</div>
+              <div className="text-[9px] text-gray-500 uppercase">Missions</div>
+            </div>
+            <div className="text-center px-3 py-1 rounded bg-gray-900/60 border border-gray-800">
+              <div className={`text-lg font-bold font-mono ${successRate >= 80 ? 'text-emerald-400' : successRate >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {successRate}%
+              </div>
+              <div className="text-[9px] text-gray-500 uppercase">Success</div>
+            </div>
+            <div className="text-center px-3 py-1 rounded bg-gray-900/60 border border-gray-800">
+              <div className="text-lg font-bold font-mono text-white">{fmtHours(avgDuration)}</div>
+              <div className="text-[9px] text-gray-500 uppercase">Avg Duration</div>
+            </div>
+            <div className="text-center px-3 py-1 rounded bg-gray-900/60 border border-gray-800">
+              <div className="text-lg font-bold font-mono text-cyan-400">{totalSaved.toLocaleString()}</div>
+              <div className="text-[9px] text-gray-500 uppercase">Lives Saved</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-gray-500 text-xs group-hover:text-emerald-400 transition-colors">▶ DETAILS</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              className="text-gray-500 hover:text-gray-300 text-sm px-1"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {showModal && (
+        <MissionModal hero={hero} onClose={() => setShowModal(false)} />
+      )}
+    </>
+  );
+}
+
 /* ── main HeroMap ─────────────────────────────────────── */
 
-export default function HeroMap() {
+export default function HeroMap({ simTime }: { simTime?: string }) {
   const [sectors, setSectors] = useState<SectorSummary[]>([]);
   const [events, setEvents] = useState<SectorEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [flyTarget, setFlyTarget] = useState<{ coords: [number, number]; zoom: number } | null>(null);
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
+  const lastFetchedTime = useRef<string>('');
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
     injectCSS();
-    Promise.all([fetchSectorSummaries(), fetchHeroEvents()])
-      .then(([s, e]) => { setSectors(s); setEvents(e); })
+    Promise.all([fetchSectorSummaries(simTime), fetchHeroEvents()])
+      .then(([s, e]) => { setSectors(s); setEvents(e); lastFetchedTime.current = simTime || ''; })
       .finally(() => setLoading(false));
   }, []);
+
+  // Re-fetch heroes when simTime changes significantly (new hour)
+  useEffect(() => {
+    if (!simTime) return;
+    const prev = lastFetchedTime.current;
+    if (!prev) { lastFetchedTime.current = simTime; return; }
+    const prevH = prev.slice(0, 13);
+    const curH = simTime.slice(0, 13);
+    if (prevH === curH) return;
+
+    lastFetchedTime.current = simTime;
+    fetchSectorSummaries(simTime).then(s => {
+      setSectors(s);
+      if (selectedHero) {
+        const updated = s.flatMap(sec => sec.heroes).find(h => h.id === selectedHero.id);
+        if (updated) setSelectedHero(updated);
+      }
+    });
+  }, [simTime, selectedHero]);
 
   const allHeroes = useMemo(() => sectors.flatMap(s => s.heroes), [sectors]);
 
   const handleHeroSelect = (h: Hero) => {
-    setSelectedHero(h);
+    setSelectedHero(prev => prev?.id === h.id ? null : h);
     setFlyTarget({ coords: h.coords, zoom: 10 });
   };
 
@@ -357,7 +580,7 @@ export default function HeroMap() {
         {/* sidebar */}
         <div className="w-56 border-r border-gray-800 bg-[#0a0e1a] p-3 flex flex-col">
           <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Hero Roster</div>
-          <HeroRoster heroes={allHeroes} onSelect={handleHeroSelect} />
+          <HeroRoster heroes={allHeroes} selectedId={selectedHero?.id ?? null} onSelect={handleHeroSelect} />
 
           <div className="mt-3 pt-3 border-t border-gray-800">
             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Event Feed</div>
@@ -383,7 +606,6 @@ export default function HeroMap() {
 
             {flyTarget && <FlyTo coords={flyTarget.coords} zoom={flyTarget.zoom} />}
 
-            {/* sector markers */}
             {sectors.map(sector => (
               <Marker
                 key={sector.sector_id}
@@ -398,7 +620,6 @@ export default function HeroMap() {
               </Marker>
             ))}
 
-            {/* individual hero markers */}
             {allHeroes.map(hero => (
               <Marker
                 key={hero.id}
@@ -409,7 +630,6 @@ export default function HeroMap() {
               </Marker>
             ))}
 
-            {/* pulsing rings for active events */}
             {events.filter(e => e.active).map(evt => (
               <CircleMarker
                 key={evt.id}
@@ -425,14 +645,6 @@ export default function HeroMap() {
               />
             ))}
           </MapContainer>
-
-          {/* selected hero floating card */}
-          {selectedHero && (
-            <div className="absolute top-3 right-3 z-[1000] bg-[#111827] border border-gray-700 rounded-lg p-3 shadow-2xl" style={{ maxWidth: 260 }}>
-              <button onClick={() => setSelectedHero(null)} className="absolute top-1 right-2 text-gray-500 hover:text-gray-300 text-sm">×</button>
-              <HeroCard hero={selectedHero} />
-            </div>
-          )}
 
           {/* bottom stats bar */}
           <div className="absolute bottom-0 left-0 right-0 z-[1000] bg-gradient-to-t from-[#0a0e1a] to-transparent pt-8 pb-3 px-4">
@@ -455,6 +667,14 @@ export default function HeroMap() {
           </div>
         </div>
       </div>
+
+      {/* hero detail panel — appears below map when a hero is selected */}
+      {selectedHero && (
+        <HeroDetailPanel
+          hero={selectedHero}
+          onClose={() => setSelectedHero(null)}
+        />
+      )}
     </div>
   );
 }

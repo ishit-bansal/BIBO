@@ -70,7 +70,7 @@ function App() {
         )}
         {activeTab === 'tactical' && (
           <div className="space-y-6">
-            <HeroMap />
+            <HeroMap simTime={live.simTime || undefined} />
           </div>
         )}
         {activeTab === 'intel' && <IntelTable />}
