@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback, DragEvent } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect, DragEvent } from 'react';
 import {
   ComposedChart, Area, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
@@ -111,7 +111,11 @@ function RiskGauge({ score, size = 48, label }: { score: number; size?: number; 
   );
 }
 
-export default function CSVUpload() {
+interface CSVUploadProps {
+  snapCount?: number;
+}
+
+export default function CSVUpload({ snapCount = 0 }: CSVUploadProps) {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [pipelineStep, setPipelineStep] = useState(0);
@@ -121,6 +125,86 @@ export default function CSVUpload() {
   const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('all');
   const fileRef = useRef<HTMLInputElement>(null);
+  const prevSnapCount = useRef(snapCount);
+
+  useEffect(() => {
+    if (snapCount === prevSnapCount.current) return;
+    prevSnapCount.current = snapCount;
+    if (!result) return;
+
+    setResult(prev => {
+      if (!prev) return prev;
+
+      try {
+        const halvePairs = prev.pairs.map(pair => {
+          const rawArr = pair.raw || [];
+          const maArr = pair.ma || [];
+          const fcstArr = pair.forecast || [];
+          const regArr = pair.regression || [];
+          const weeklyArr = pair.weekly_forecast || [];
+
+          const halfRaw = rawArr
+            .filter(() => Math.random() > 0.5)
+            .map(d => ({ ...d, stock: +(d.stock * 0.5).toFixed(2) }));
+          const halfMa = maArr
+            .filter(() => Math.random() > 0.5)
+            .map(d => ({ ...d, ma_stock: +(d.ma_stock * 0.5).toFixed(2) }));
+          const halfForecast = fcstArr.map(d => ({
+            ...d,
+            predicted_stock: +Math.max(0, d.predicted_stock * 0.5).toFixed(2),
+          }));
+          const halfReg = regArr.map(d => ({
+            ...d,
+            reg_stock: +(d.reg_stock * 0.5).toFixed(2),
+          }));
+          const halfWeekly = weeklyArr.map(d => ({
+            ...d,
+            projected_stock: +Math.max(0, d.projected_stock * 0.5).toFixed(2),
+          }));
+
+          const s = pair.stats;
+          const newCurrent = +(s.current * 0.5).toFixed(2);
+          const newMax = +(s.max * 0.5).toFixed(2);
+          const newMean = +(s.mean * 0.5).toFixed(2);
+          const newMin = +(s.min * 0.5).toFixed(2);
+          const stockPct = newMax > 0 ? +((newCurrent / newMax) * 100).toFixed(1) : 0;
+          const htz = s.hours_to_zero != null ? +(s.hours_to_zero * 0.5).toFixed(1) : null;
+          const newRisk = Math.max(0, Math.round(s.risk_score * 0.5));
+          const newStatus: typeof s.status =
+            newRisk < 20 ? 'critical' : newRisk < 50 ? 'warning' : s.status;
+
+          return {
+            ...pair,
+            raw: halfRaw.length > 0 ? halfRaw : rawArr.slice(0, 1).map(d => ({ ...d, stock: +(d.stock * 0.5).toFixed(2) })),
+            ma: halfMa,
+            forecast: halfForecast,
+            regression: halfReg,
+            weekly_forecast: halfWeekly,
+            stats: {
+              ...s,
+              current: newCurrent,
+              max: newMax,
+              mean: newMean,
+              min: newMin,
+              stock_pct: stockPct,
+              hours_to_zero: htz,
+              risk_score: newRisk,
+              status: newStatus,
+              data_points: Math.max(1, Math.ceil(s.data_points / 2)),
+            },
+          };
+        });
+
+        return {
+          ...prev,
+          pairs: halvePairs,
+          total_records: Math.max(1, Math.ceil(prev.total_records / 2)),
+        };
+      } catch {
+        return prev;
+      }
+    });
+  }, [snapCount, result]);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.name.endsWith('.csv')) {

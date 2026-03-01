@@ -12,24 +12,12 @@ router = APIRouter(prefix="/api/supply", tags=["Supply Chain"])
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "supply_chain_shipments.csv")
 
-_shipments_cache: list[dict] | None = None
-_factories_cache: list[dict] | None = None
-
-
 def _load_factories() -> list[dict]:
-    global _factories_cache
-    if _factories_cache is None:
-        with open(os.path.join(DATA_DIR, "factories.json")) as f:
-            _factories_cache = json.load(f)
-    return _factories_cache
+    with open(os.path.join(DATA_DIR, "factories.json")) as f:
+        return json.load(f)
 
 
 def _load_shipments() -> list[dict]:
-    global _shipments_cache
-    if _shipments_cache is not None:
-        return _shipments_cache
-
-    # Try Docker path first, then local
     path = CSV_PATH
     if not os.path.exists(path):
         path = os.path.join(os.path.dirname(__file__), "..", "..", "supply_chain_shipments.csv")
@@ -47,7 +35,6 @@ def _load_shipments() -> list[dict]:
             row["dest_lat"] = float(row["dest_lat"])
             row["dest_lon"] = float(row["dest_lon"])
             rows.append(row)
-    _shipments_cache = rows
     return rows
 
 

@@ -1,46 +1,22 @@
 [
   {
-    "id": "factory-stark",
-    "name": "Stark Manufacturing Hub",
-    "sector": "Avengers Compound",
-    "coords": [41.14, -73.80],
-    "icon": "factory",
-    "resources": {
-      "Arc Reactor Cores": { "production_rate": 14, "initial_stock": 600, "max_capacity": 1200 },
-      "Medical Kits":      { "production_rate": 10, "initial_stock": 400, "max_capacity": 800 }
-    }
-  },
-  {
     "id": "factory-wakanda",
     "name": "Vibranium Refinery",
     "sector": "Wakanda",
     "coords": [-1.32, 29.18],
     "icon": "vibranium_mine",
     "resources": {
-      "Vibranium (kg)":    { "production_rate": 8, "initial_stock": 900, "max_capacity": 1500 },
-      "Arc Reactor Cores": { "production_rate": 6, "initial_stock": 350, "max_capacity": 700 }
+      "Vibranium (kg)": { "production_rate": 12, "initial_stock": 900, "max_capacity": 1500 }
     }
   },
   {
-    "id": "factory-asgard",
-    "name": "Nidavellir Forge",
-    "sector": "New Asgard",
-    "coords": [63.40, 10.35],
-    "icon": "water_wheel",
-    "resources": {
-      "Vibranium (kg)":    { "production_rate": 5, "initial_stock": 400, "max_capacity": 800 },
-      "Clean Water (L)":   { "production_rate": 12, "initial_stock": 500, "max_capacity": 1000 }
-    }
-  },
-  {
-    "id": "factory-sanctum",
-    "name": "Arcane Workshop",
-    "sector": "Sanctum Sanctorum",
-    "coords": [40.728, -74.001],
+    "id": "factory-stark",
+    "name": "Stark Manufacturing Hub",
+    "sector": "Avengers Compound",
+    "coords": [41.14, -73.80],
     "icon": "factory",
     "resources": {
-      "Clean Water (L)":   { "production_rate": 10, "initial_stock": 350, "max_capacity": 700 },
-      "Pym Particles":     { "production_rate": 6, "initial_stock": 280, "max_capacity": 500 }
+      "Arc Reactor Cores": { "production_rate": 14, "initial_stock": 600, "max_capacity": 1200 }
     }
   },
   {
@@ -50,8 +26,17 @@
     "coords": [43.82, 20.42],
     "icon": "hospital",
     "resources": {
-      "Medical Kits":  { "production_rate": 18, "initial_stock": 550, "max_capacity": 1000 },
-      "Pym Particles": { "production_rate": 8, "initial_stock": 320, "max_capacity": 600 }
+      "Medical Kits": { "production_rate": 18, "initial_stock": 550, "max_capacity": 1000 }
+    }
+  },
+  {
+    "id": "factory-asgard",
+    "name": "Nidavellir Forge",
+    "sector": "New Asgard",
+    "coords": [63.40, 10.35],
+    "icon": "water_wheel",
+    "resources": {
+      "Clean Water (L)": { "production_rate": 15, "initial_stock": 500, "max_capacity": 1000 }
     }
   }
 ]

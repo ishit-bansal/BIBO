@@ -1,76 +1,77 @@
 shipment_id,resource_type,quantity,priority,source_factory_id,source_name,source_sector,source_lat,source_lon,dest_sector,dest_hero,dest_lat,dest_lon,depart_time,arrive_time,travel_hours
-SHP-0027,Vibranium (kg),805,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-01T07:00:00,2026-01-02T08:00:00,25
-SHP-0002,Medical Kits,215,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Captain America,41.16,-73.76,2026-01-01T12:00:00,2026-01-02T08:00:00,20
-SHP-0008,Vibranium (kg),390,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Wakanda,Hulk,-1.28,29.22,2026-01-01T17:00:00,2026-01-02T12:00:00,19
-SHP-0028,Vibranium (kg),185,low,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-01T21:00:00,2026-01-03T03:00:00,30
-SHP-0038,Medical Kits,845,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Hulk,-1.28,29.22,2026-01-01T21:00:00,2026-01-02T16:00:00,19
-SHP-0013,Medical Kits,825,low,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Avengers Compound,Superman,38.9,-94.7,2026-01-02T01:00:00,2026-01-02T19:00:00,18
-SHP-0039,Medical Kits,335,urgent,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Thor,63.43,10.39,2026-01-02T06:00:00,2026-01-03T00:00:00,18
-SHP-0023,Vibranium (kg),720,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Wakanda,Hulk,-1.28,29.22,2026-01-02T08:00:00,2026-01-03T03:00:00,19
-SHP-0030,Arc Reactor Cores,940,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Captain America,41.16,-73.76,2026-01-02T11:00:00,2026-01-03T12:00:00,25
-SHP-0049,Pym Particles,640,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Hulk,-1.28,29.22,2026-01-02T11:00:00,2026-01-02T23:00:00,12
-SHP-0019,Pym Particles,655,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Captain America,41.16,-73.76,2026-01-02T18:00:00,2026-01-03T13:00:00,19
-SHP-0071,Arc Reactor Cores,690,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-03T02:00:00,2026-01-04T03:00:00,25
-SHP-0005,Arc Reactor Cores,530,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Batman,43.85,20.45,2026-01-03T11:00:00,2026-01-04T03:00:00,16
-SHP-0011,Arc Reactor Cores,585,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,New Asgard,Thor,63.43,10.39,2026-01-03T16:00:00,2026-01-03T19:00:00,3
-SHP-0070,Arc Reactor Cores,990,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Avengers Compound,Superman,38.9,-94.7,2026-01-03T19:00:00,2026-01-04T12:00:00,17
-SHP-0054,Vibranium (kg),525,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Batman,43.85,20.45,2026-01-03T23:00:00,2026-01-04T00:00:00,1
-SHP-0057,Vibranium (kg),520,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Thor,63.43,10.39,2026-01-03T23:00:00,2026-01-05T05:00:00,30
-SHP-0032,Pym Particles,785,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-04T00:00:00,2026-01-04T19:00:00,19
-SHP-0048,Medical Kits,910,low,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Hulk,-1.28,29.22,2026-01-04T05:00:00,2026-01-05T00:00:00,19
-SHP-0044,Medical Kits,435,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-04T09:00:00,2026-01-05T03:00:00,18
-SHP-0033,Clean Water (L),195,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Wakanda,Hulk,-1.28,29.22,2026-01-04T21:00:00,2026-01-06T00:00:00,27
-SHP-0036,Arc Reactor Cores,680,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Thor,63.43,10.39,2026-01-05T03:00:00,2026-01-06T05:00:00,26
-SHP-0009,Arc Reactor Cores,910,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-05T08:00:00,2026-01-06T08:00:00,24
-SHP-0074,Clean Water (L),195,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Captain America,41.16,-73.76,2026-01-05T08:00:00,2026-01-06T05:00:00,21
-SHP-0029,Vibranium (kg),720,high,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,New Asgard,Thor,63.43,10.39,2026-01-05T10:00:00,2026-01-06T05:00:00,19
-SHP-0045,Vibranium (kg),660,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Superman,38.9,-94.7,2026-01-05T10:00:00,2026-01-06T11:00:00,25
-SHP-0046,Vibranium (kg),945,high,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Captain America,41.16,-73.76,2026-01-05T15:00:00,2026-01-06T17:00:00,26
-SHP-0037,Pym Particles,170,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sokovia,Batman,43.85,20.45,2026-01-05T18:00:00,2026-01-06T09:00:00,15
-SHP-0065,Clean Water (L),365,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,New Asgard,Thor,63.43,10.39,2026-01-05T20:00:00,2026-01-06T12:00:00,16
-SHP-0062,Medical Kits,255,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-06T00:00:00,2026-01-06T16:00:00,16
-SHP-0063,Clean Water (L),990,high,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Captain America,41.16,-73.76,2026-01-06T02:00:00,2026-01-07T02:00:00,24
-SHP-0006,Clean Water (L),435,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Sokovia,Batman,43.85,20.45,2026-01-06T11:00:00,2026-01-07T05:00:00,18
-SHP-0026,Clean Water (L),760,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Captain America,41.16,-73.76,2026-01-06T18:00:00,2026-01-07T22:00:00,28
-SHP-0014,Vibranium (kg),920,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Captain America,41.16,-73.76,2026-01-07T04:00:00,2026-01-08T05:00:00,25
-SHP-0058,Medical Kits,785,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Sokovia,Batman,43.85,20.45,2026-01-07T07:00:00,2026-01-08T05:00:00,22
-SHP-0041,Medical Kits,845,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Captain America,41.16,-73.76,2026-01-07T17:00:00,2026-01-08T08:00:00,15
-SHP-0066,Pym Particles,370,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-08T02:00:00,2026-01-08T17:00:00,15
-SHP-0073,Pym Particles,415,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sokovia,Batman,43.85,20.45,2026-01-08T03:00:00,2026-01-08T22:00:00,19
-SHP-0035,Vibranium (kg),610,low,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Superman,38.9,-94.7,2026-01-08T15:00:00,2026-01-09T10:00:00,19
-SHP-0022,Medical Kits,240,low,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Captain America,41.16,-73.76,2026-01-08T18:00:00,2026-01-09T13:00:00,19
-SHP-0016,Pym Particles,160,low,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sokovia,Batman,43.85,20.45,2026-01-08T19:00:00,2026-01-09T15:00:00,20
-SHP-0069,Medical Kits,410,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Hulk,-1.28,29.22,2026-01-08T19:00:00,2026-01-09T15:00:00,20
-SHP-0015,Vibranium (kg),845,normal,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Superman,38.9,-94.7,2026-01-09T08:00:00,2026-01-10T12:00:00,28
-SHP-0020,Medical Kits,235,low,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,New Asgard,Thor,63.43,10.39,2026-01-09T09:00:00,2026-01-09T12:00:00,3
-SHP-0051,Pym Particles,570,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-09T16:00:00,2026-01-10T10:00:00,18
-SHP-0007,Clean Water (L),900,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Avengers Compound,Superman,38.9,-94.7,2026-01-09T22:00:00,2026-01-10T10:00:00,12
-SHP-0059,Arc Reactor Cores,435,urgent,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Wakanda,Hulk,-1.28,29.22,2026-01-10T02:00:00,2026-01-11T02:00:00,24
-SHP-0017,Vibranium (kg),590,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Captain America,41.16,-73.76,2026-01-10T05:00:00,2026-01-11T09:00:00,28
-SHP-0068,Vibranium (kg),190,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Superman,38.9,-94.7,2026-01-10T16:00:00,2026-01-11T11:00:00,19
-SHP-0060,Pym Particles,750,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-10T17:00:00,2026-01-11T08:00:00,15
-SHP-0050,Arc Reactor Cores,435,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Sokovia,Batman,43.85,20.45,2026-01-11T04:00:00,2026-01-11T20:00:00,16
-SHP-0010,Arc Reactor Cores,995,low,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Batman,43.85,20.45,2026-01-11T18:00:00,2026-01-12T09:00:00,15
-SHP-0064,Vibranium (kg),320,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Superman,38.9,-94.7,2026-01-11T18:00:00,2026-01-12T12:00:00,18
-SHP-0042,Clean Water (L),405,high,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Avengers Compound,Superman,38.9,-94.7,2026-01-12T00:00:00,2026-01-13T06:00:00,30
-SHP-0031,Pym Particles,925,urgent,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-12T04:00:00,2026-01-12T05:00:00,1
-SHP-0018,Pym Particles,245,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,New Asgard,Thor,63.43,10.39,2026-01-12T07:00:00,2026-01-12T08:00:00,1
-SHP-0061,Medical Kits,100,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Hulk,-1.28,29.22,2026-01-12T11:00:00,2026-01-12T23:00:00,12
-SHP-0001,Arc Reactor Cores,965,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Avengers Compound,Superman,38.9,-94.7,2026-01-12T12:00:00,2026-01-13T12:00:00,24
-SHP-0003,Medical Kits,995,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Thor,63.43,10.39,2026-01-12T13:00:00,2026-01-13T02:00:00,13
-SHP-0047,Arc Reactor Cores,295,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-12T17:00:00,2026-01-13T14:00:00,21
-SHP-0021,Vibranium (kg),790,low,factory-asgard,Nidavellir Forge,New Asgard,63.4,10.35,Sokovia,Batman,43.85,20.45,2026-01-12T21:00:00,2026-01-13T22:00:00,25
-SHP-0025,Pym Particles,980,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Superman,38.9,-94.7,2026-01-12T23:00:00,2026-01-13T19:00:00,20
-SHP-0055,Clean Water (L),235,normal,factory-sanctum,Arcane Workshop,Sanctum Sanctorum,40.728,-74.001,Wakanda,Hulk,-1.28,29.22,2026-01-13T09:00:00,2026-01-14T07:00:00,22
-SHP-0004,Arc Reactor Cores,105,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Captain America,41.16,-73.76,2026-01-13T14:00:00,2026-01-14T16:00:00,26
-SHP-0056,Medical Kits,685,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Avengers Compound,Superman,38.9,-94.7,2026-01-13T18:00:00,2026-01-14T19:00:00,25
-SHP-0067,Vibranium (kg),400,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Thor,63.43,10.39,2026-01-13T22:00:00,2026-01-14T19:00:00,21
-SHP-0072,Pym Particles,745,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-14T00:00:00,2026-01-14T16:00:00,16
-SHP-0034,Medical Kits,215,low,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Thor,63.43,10.39,2026-01-14T07:00:00,2026-01-15T01:00:00,18
-SHP-0012,Medical Kits,170,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Captain America,41.16,-73.76,2026-01-14T09:00:00,2026-01-15T04:00:00,19
-SHP-0052,Arc Reactor Cores,365,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Thor,63.43,10.39,2026-01-15T05:00:00,2026-01-16T01:00:00,20
-SHP-0075,Arc Reactor Cores,200,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Batman,43.85,20.45,2026-01-15T06:00:00,2026-01-15T23:00:00,17
-SHP-0043,Arc Reactor Cores,190,urgent,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sanctum Sanctorum,Spiderman,40.73,-73.99,2026-01-15T12:00:00,2026-01-16T13:00:00,25
-SHP-0024,Medical Kits,310,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Sokovia,Batman,43.85,20.45,2026-01-16T00:00:00,2026-01-16T19:00:00,19
-SHP-0040,Arc Reactor Cores,825,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,Avengers Compound,Superman,38.9,-94.7,2026-01-16T02:00:00,2026-01-16T17:00:00,15
-SHP-0053,Medical Kits,295,low,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.8,New Asgard,Thor,63.43,10.39,2026-01-17T00:00:00,2026-01-17T05:00:00,5
+SHP-0001,Vibranium (kg),480,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-01T07:00:00,2026-01-02T07:00:00,24
+SHP-0002,Vibranium (kg),350,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Sokovian Depot,43.82,20.42,2026-01-01T14:00:00,2026-01-02T02:00:00,12
+SHP-0003,Vibranium (kg),620,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-02T06:00:00,2026-01-03T00:00:00,18
+SHP-0004,Vibranium (kg),710,urgent,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-03T08:00:00,2026-01-04T09:00:00,25
+SHP-0005,Vibranium (kg),290,low,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Sokovian Depot,43.82,20.42,2026-01-04T03:00:00,2026-01-04T14:00:00,11
+SHP-0006,Vibranium (kg),530,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-05T10:00:00,2026-01-06T02:00:00,16
+SHP-0007,Vibranium (kg),445,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-06T01:00:00,2026-01-07T00:00:00,23
+SHP-0008,Vibranium (kg),820,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Sokovian Depot,43.82,20.42,2026-01-06T19:00:00,2026-01-07T08:00:00,13
+SHP-0009,Vibranium (kg),560,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-07T15:00:00,2026-01-08T08:00:00,17
+SHP-0010,Vibranium (kg),680,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-08T22:00:00,2026-01-09T22:00:00,24
+SHP-0011,Vibranium (kg),195,low,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Sokovian Depot,43.82,20.42,2026-01-09T11:00:00,2026-01-09T21:00:00,10
+SHP-0012,Vibranium (kg),740,urgent,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-10T05:00:00,2026-01-10T23:00:00,18
+SHP-0013,Vibranium (kg),385,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-11T09:00:00,2026-01-12T11:00:00,26
+SHP-0014,Vibranium (kg),510,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Sokovian Depot,43.82,20.42,2026-01-12T02:00:00,2026-01-12T14:00:00,12
+SHP-0015,Vibranium (kg),675,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-13T07:00:00,2026-01-13T23:00:00,16
+SHP-0016,Vibranium (kg),300,high,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-14T04:00:00,2026-01-15T03:00:00,23
+SHP-0017,Vibranium (kg),890,urgent,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Sokovia,Sokovian Depot,43.82,20.42,2026-01-14T20:00:00,2026-01-15T07:00:00,11
+SHP-0018,Vibranium (kg),420,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-16T00:00:00,2026-01-16T17:00:00,17
+SHP-0019,Vibranium (kg),555,normal,factory-wakanda,Vibranium Refinery,Wakanda,-1.32,29.18,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-17T06:00:00,2026-01-18T07:00:00,25
+SHP-0020,Arc Reactor Cores,12,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-01T04:00:00,2026-01-02T04:00:00,24
+SHP-0021,Arc Reactor Cores,8,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Sokovia,Sokovian Depot,43.82,20.42,2026-01-01T18:00:00,2026-01-02T09:00:00,15
+SHP-0022,Arc Reactor Cores,15,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-02T12:00:00,2026-01-03T02:00:00,14
+SHP-0023,Arc Reactor Cores,20,urgent,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-03T05:00:00,2026-01-04T06:00:00,25
+SHP-0024,Arc Reactor Cores,6,low,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Sokovia,Sokovian Depot,43.82,20.42,2026-01-04T00:00:00,2026-01-04T16:00:00,16
+SHP-0025,Arc Reactor Cores,18,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-04T20:00:00,2026-01-05T09:00:00,13
+SHP-0026,Arc Reactor Cores,10,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-05T14:00:00,2026-01-06T13:00:00,23
+SHP-0027,Arc Reactor Cores,14,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Sokovia,Sokovian Depot,43.82,20.42,2026-01-06T08:00:00,2026-01-07T01:00:00,17
+SHP-0028,Arc Reactor Cores,9,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-07T01:00:00,2026-01-07T13:00:00,12
+SHP-0029,Arc Reactor Cores,25,urgent,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-08T06:00:00,2026-01-09T06:00:00,24
+SHP-0030,Arc Reactor Cores,11,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Sokovia,Sokovian Depot,43.82,20.42,2026-01-09T03:00:00,2026-01-09T18:00:00,15
+SHP-0031,Arc Reactor Cores,16,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-09T19:00:00,2026-01-10T09:00:00,14
+SHP-0032,Arc Reactor Cores,7,low,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-10T10:00:00,2026-01-11T12:00:00,26
+SHP-0033,Arc Reactor Cores,22,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Sokovia,Sokovian Depot,43.82,20.42,2026-01-11T14:00:00,2026-01-12T06:00:00,16
+SHP-0034,Arc Reactor Cores,13,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-12T05:00:00,2026-01-12T18:00:00,13
+SHP-0035,Arc Reactor Cores,19,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-13T11:00:00,2026-01-14T11:00:00,24
+SHP-0036,Arc Reactor Cores,8,high,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Sokovia,Sokovian Depot,43.82,20.42,2026-01-14T07:00:00,2026-01-14T22:00:00,15
+SHP-0037,Arc Reactor Cores,21,urgent,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-15T17:00:00,2026-01-16T07:00:00,14
+SHP-0038,Arc Reactor Cores,10,normal,factory-stark,Stark Manufacturing Hub,Avengers Compound,41.14,-73.80,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-16T09:00:00,2026-01-17T08:00:00,23
+SHP-0039,Medical Kits,200,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-01T02:00:00,2026-01-01T13:00:00,11
+SHP-0040,Medical Kits,350,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-01T10:00:00,2026-01-02T02:00:00,16
+SHP-0041,Medical Kits,150,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-02T05:00:00,2026-01-02T11:00:00,6
+SHP-0042,Medical Kits,420,urgent,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-02T21:00:00,2026-01-03T09:00:00,12
+SHP-0043,Medical Kits,280,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-03T14:00:00,2026-01-04T05:00:00,15
+SHP-0044,Medical Kits,175,low,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-04T08:00:00,2026-01-04T13:00:00,5
+SHP-0045,Medical Kits,310,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-05T01:00:00,2026-01-05T14:00:00,13
+SHP-0046,Medical Kits,545,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-05T18:00:00,2026-01-06T11:00:00,17
+SHP-0047,Medical Kits,190,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-06T12:00:00,2026-01-06T18:00:00,6
+SHP-0048,Medical Kits,460,urgent,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-07T07:00:00,2026-01-07T18:00:00,11
+SHP-0049,Medical Kits,225,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-08T04:00:00,2026-01-08T20:00:00,16
+SHP-0050,Medical Kits,380,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-09T00:00:00,2026-01-09T05:00:00,5
+SHP-0051,Medical Kits,130,low,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-09T15:00:00,2026-01-10T03:00:00,12
+SHP-0052,Medical Kits,500,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-10T20:00:00,2026-01-11T11:00:00,15
+SHP-0053,Medical Kits,290,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-11T13:00:00,2026-01-11T19:00:00,6
+SHP-0054,Medical Kits,410,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-12T08:00:00,2026-01-12T21:00:00,13
+SHP-0055,Medical Kits,680,urgent,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-13T16:00:00,2026-01-14T08:00:00,16
+SHP-0056,Medical Kits,245,normal,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,New Asgard,Nidavellir Forge,63.40,10.35,2026-01-15T02:00:00,2026-01-15T07:00:00,5
+SHP-0057,Medical Kits,370,high,factory-sokovia,Sokovian Supply Depot,Sokovia,43.82,20.42,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-16T10:00:00,2026-01-16T21:00:00,11
+SHP-0058,Clean Water (L),800,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-01T00:00:00,2026-01-01T17:00:00,17
+SHP-0059,Clean Water (L),650,high,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-01T15:00:00,2026-01-02T04:00:00,13
+SHP-0060,Clean Water (L),400,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Sokovia,Sokovian Depot,43.82,20.42,2026-01-02T09:00:00,2026-01-02T14:00:00,5
+SHP-0061,Clean Water (L),950,urgent,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-03T03:00:00,2026-01-03T21:00:00,18
+SHP-0062,Clean Water (L),520,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-03T20:00:00,2026-01-04T10:00:00,14
+SHP-0063,Clean Water (L),330,high,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Sokovia,Sokovian Depot,43.82,20.42,2026-01-04T12:00:00,2026-01-04T18:00:00,6
+SHP-0064,Clean Water (L),710,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-05T06:00:00,2026-01-05T22:00:00,16
+SHP-0065,Clean Water (L),580,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-06T04:00:00,2026-01-06T17:00:00,13
+SHP-0066,Clean Water (L),440,high,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Sokovia,Sokovian Depot,43.82,20.42,2026-01-06T21:00:00,2026-01-07T02:00:00,5
+SHP-0067,Clean Water (L),860,urgent,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-07T18:00:00,2026-01-08T11:00:00,17
+SHP-0068,Clean Water (L),390,low,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-08T14:00:00,2026-01-09T04:00:00,14
+SHP-0069,Clean Water (L),720,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Sokovia,Sokovian Depot,43.82,20.42,2026-01-09T08:00:00,2026-01-09T14:00:00,6
+SHP-0070,Clean Water (L),505,high,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-10T01:00:00,2026-01-10T19:00:00,18
+SHP-0071,Clean Water (L),830,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-11T07:00:00,2026-01-11T20:00:00,13
+SHP-0072,Clean Water (L),280,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Sokovia,Sokovian Depot,43.82,20.42,2026-01-12T00:00:00,2026-01-12T05:00:00,5
+SHP-0073,Clean Water (L),940,high,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-13T04:00:00,2026-01-13T20:00:00,16
+SHP-0074,Clean Water (L),610,urgent,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Avengers Compound,Stark Manufacturing,41.14,-73.80,2026-01-14T15:00:00,2026-01-15T05:00:00,14
+SHP-0075,Clean Water (L),350,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Sokovia,Sokovian Depot,43.82,20.42,2026-01-15T10:00:00,2026-01-15T16:00:00,6
+SHP-0076,Clean Water (L),475,normal,factory-asgard,Nidavellir Forge,New Asgard,63.40,10.35,Wakanda,Vibranium Refinery,-1.32,29.18,2026-01-16T19:00:00,2026-01-17T12:00:00,17

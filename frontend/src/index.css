@@ -36,6 +36,10 @@
   --sprite-slice: 8;
 }
 
+*, *::before, *::after {
+  cursor: url('./assets/sprites/environment/cursor.png'), auto !important;
+}
+
 body {
   margin: 0;
   background-color: #517fff;
@@ -82,6 +86,17 @@ body {
 
 .text-\[11px\] {
   font-size: 1rem !important;
+}
+
+@keyframes siren-flash {
+  0%   { background: rgba(255, 0, 0, 0.08); }
+  50%  { background: rgba(0, 0, 255, 0.06); }
+  100% { background: rgba(255, 0, 0, 0.08); }
+}
+
+@keyframes bo-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
 }
 
 @keyframes shake {

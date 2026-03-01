@@ -103,12 +103,12 @@ function heroIcon(emoji: string, color: string, imageUrl?: string | null) {
   if (imageUrl) {
     return L.divIcon({
       className: '',
-      iconSize: [64, 64],
-      iconAnchor: [32, 32],
-      popupAnchor: [0, -34],
-      html: `<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;
-                   cursor:pointer;position:relative;z-index:400;filter:drop-shadow(0 0 6px ${color});">
-               <img src="${imageUrl}" alt="hero" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;" />
+      iconSize: [56, 56],
+      iconAnchor: [28, 28],
+      popupAnchor: [0, -30],
+      html: `<div style="width:56px;height:56px;border-radius:50%;overflow:hidden;border:3px solid ${color};
+                   box-shadow:0 0 8px ${color};cursor:pointer;position:relative;z-index:400;">
+               <img src="${imageUrl}" alt="hero" style="width:100%;height:100%;object-fit:cover;image-rendering:pixelated;transform:scale(1.35);" />
              </div>`,
     });
   }
@@ -149,7 +149,11 @@ function resolveHeroSprite(hero: Hero) {
 function heroVisual(hero: Hero, className: string) {
   const src = resolveHeroSprite(hero);
   if (!src) return <span className={className}>{hero.avatar}</span>;
-  return <img src={src} alt={hero.alias} className={className} />;
+  return (
+    <span className={`${className} inline-block overflow-hidden rounded-full`} style={{ lineHeight: 0 }}>
+      <img src={src} alt={hero.alias} style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated', transform: 'scale(1.35)' }} />
+    </span>
+  );
 }
 
 const SECTOR_EMOJI: Record<string, string> = {

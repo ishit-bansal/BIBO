@@ -41,21 +41,27 @@ export type { TimelinePoint };
 
 const WS_URL = `${(import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/^http/, 'ws')}/ws/live`;
 
+export interface SnapEvent {
+  type: 'snap_event';
+  deleted: number;
+  remaining: number;
+  message: string;
+}
+
 export function useLiveData() {
   const [connected, setConnected] = useState(false);
   const [currentTick, setCurrentTick] = useState<ResourceTick | null>(null);
   const [simTime, setSimTime] = useState<string>('');
   const [progress, setProgress] = useState(0);
+  const [snapEvent, setSnapEvent] = useState<SnapEvent | null>(null);
 
-  // Full timeline from the DB (all 400 timestamps, fetched once)
   const [fullTimeline, setFullTimeline] = useState<TimelinePoint[]>([]);
   const [timelineLoaded, setTimelineLoaded] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load entire CSV-derived timeline on mount
-  useEffect(() => {
+  const reloadTimeline = useCallback(() => {
     fetchTimeline()
       .then(data => {
         setFullTimeline(data);
@@ -65,6 +71,10 @@ export function useLiveData() {
         console.error('Failed to load timeline:', err);
       });
   }, []);
+
+  useEffect(() => { reloadTimeline(); }, [reloadTimeline]);
+
+  const clearSnap = useCallback(() => setSnapEvent(null), []);
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -79,14 +89,17 @@ export function useLiveData() {
     };
 
     ws.onmessage = (evt) => {
-      const msg: ResourceTick = JSON.parse(evt.data);
+      const msg = JSON.parse(evt.data);
       if (msg.type === 'resource_tick') {
-        setCurrentTick(msg);
+        setCurrentTick(msg as ResourceTick);
         setSimTime(msg.timestamp);
         setProgress(Math.round((msg.tick_index / msg.total_ticks) * 100));
+      } else if (msg.type === 'snap_event') {
+        setSnapEvent(msg as SnapEvent);
+        reloadTimeline();
       }
     };
-  }, []);
+  }, [reloadTimeline]);
 
   useEffect(() => {
     connect();
@@ -103,5 +116,7 @@ export function useLiveData() {
     currentTick,
     fullTimeline,
     timelineLoaded,
+    snapEvent,
+    clearSnap,
   };
 }

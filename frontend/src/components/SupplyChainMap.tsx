@@ -21,7 +21,6 @@ const RESOURCE_COLORS: Record<string, string> = {
   'Vibranium (kg)': '#8b5cf6',
   'Medical Kits': '#10b981',
   'Clean Water (L)': '#06b6d4',
-  'Pym Particles': '#f59e0b',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -74,9 +73,9 @@ function factoryIcon(iconKey: string, color: string) {
       iconSize: [56, 56],
       iconAnchor: [28, 28],
       popupAnchor: [0, -30],
-      html: `<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;
-                   cursor:pointer;position:relative;z-index:500;filter:drop-shadow(0 0 6px ${color});">
-               <img src="${spriteUrl}" alt="factory" style="width:56px;height:56px;object-fit:contain;image-rendering:pixelated;" />
+      html: `<div style="width:56px;height:56px;border-radius:12px;overflow:hidden;border:2px solid ${color};
+                   box-shadow:0 0 8px ${color};cursor:pointer;position:relative;z-index:500;background:#fff;">
+               <img src="${spriteUrl}" alt="factory" style="width:100%;height:100%;object-fit:cover;image-rendering:pixelated;transform:scale(1.25);" />
              </div>`,
     });
   }
@@ -93,19 +92,6 @@ function factoryIcon(iconKey: string, color: string) {
   });
 }
 
-function heroDestIcon(emoji: string) {
-  return L.divIcon({
-    className: '',
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -16],
-    html: `<div style="width:28px;height:28px;border-radius:50%;border:2px solid #10b981;
-                 background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;
-                 font-size:14px;box-shadow:0 0 6px #10b981;cursor:pointer;position:relative;z-index:400;">
-             ${emoji}
-           </div>`,
-  });
-}
 
 /* ── auto-fly ─────────────────────────────────────────── */
 
@@ -291,7 +277,14 @@ function ShipmentList({ shipments, selectedId, onSelect }: {
               </div>
               <span className="text-[9px] font-mono text-gray-600 font-medium">{s.progress_pct}%</span>
             </div>
-            <div className="text-[9px] text-gray-500 mt-0.5">ETA: {s.eta_hours > 0 ? `${s.eta_hours}h` : 'Arrived'}</div>
+            <div className="flex justify-between text-[9px] text-gray-500 mt-0.5">
+              <span>ETA: {s.eta_hours > 0 ? `${s.eta_hours}h` : 'Arrived'}</span>
+              <span>{s.travel_hours}h trip</span>
+            </div>
+            <div className="flex justify-between text-[8px] text-gray-400 mt-0.5">
+              <span>Dep: {new Date(s.depart_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              <span>Arr: {new Date(s.arrive_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
           </button>
         );
       })}
@@ -407,13 +400,6 @@ function ShipmentDetail({ shipment, onClose }: { shipment: Shipment; onClose: ()
   );
 }
 
-/* ── unique hero icons for destinations ───────────────── */
-
-const HERO_EMOJI: Record<string, string> = {
-  Thor: '⚡', Spiderman: '🕷️', Batman: '🦇',
-  'Captain America': '🦅', Hulk: '💪', Superman: '💫',
-};
-
 /* ── main SupplyChainMap ──────────────────────────────── */
 
 export default function SupplyChainMap({ simTime }: { simTime?: string }) {
@@ -454,18 +440,7 @@ export default function SupplyChainMap({ simTime }: { simTime?: string }) {
     return data.active_shipments;
   }, [data, showFilter]);
 
-  const uniqueDestinations = useMemo(() => {
-    if (!data) return [];
-    const seen = new Set<string>();
-    const dests: { hero: string; coords: [number, number] }[] = [];
-    for (const s of data.active_shipments) {
-      if (!seen.has(s.dest_hero)) {
-        seen.add(s.dest_hero);
-        dests.push({ hero: s.dest_hero, coords: [s.dest_lat, s.dest_lon] });
-      }
-    }
-    return dests;
-  }, [data]);
+  // Destinations are factory locations, already shown as factory markers
 
   if (loading || !data) {
     return (
@@ -582,14 +557,7 @@ export default function SupplyChainMap({ simTime }: { simTime?: string }) {
               );
             })}
 
-            {/* hero destination markers */}
-            {uniqueDestinations.map(d => (
-              <Marker
-                key={d.hero}
-                position={d.coords}
-                icon={heroDestIcon(HERO_EMOJI[d.hero] || '📍')}
-              />
-            ))}
+            {/* destinations are the same factory locations — no separate markers needed */}
 
             {/* shipment arcs */}
             {data.active_shipments.map(s => (

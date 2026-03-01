@@ -10,6 +10,7 @@ import SupplyChainMap from './components/SupplyChainMap';
 import LiveTicker from './components/LiveTicker';
 import LoginPage from './components/LoginPage';
 import UserManagement from './components/UserManagement';
+import BoSprite from './components/BoSprite';
 import { useLiveData } from './hooks/useLiveData';
 import type { AuthUser, UserRole } from './components/LoginPage';
 
@@ -34,6 +35,22 @@ function App() {
   const [scOpen, setScOpen] = useState(false);
   const scRef = useRef<HTMLDivElement>(null);
   const live = useLiveData();
+  const [snapInProgress, setSnapInProgress] = useState(false);
+  const [snapCount, setSnapCount] = useState(0);
+  const clearSnapRef = useRef(live.clearSnap);
+  clearSnapRef.current = live.clearSnap;
+
+  useEffect(() => {
+    if (live.snapEvent && !snapInProgress) {
+      setSnapInProgress(true);
+      setSnapCount(c => c + 1);
+    }
+  }, [live.snapEvent, snapInProgress]);
+
+  const handleSnapComplete = useCallback(() => {
+    setSnapInProgress(false);
+    clearSnapRef.current();
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -89,8 +106,15 @@ function App() {
     </button>
   );
 
+  const isDashboard = activeTab === 'analyze' || activeTab === 'dashboard';
+
   return (
     <div className="ui-polish-v1 min-h-screen bg-transparent text-gray-200">
+      <BoSprite
+        snapTriggered={snapInProgress}
+        onSnapComplete={handleSnapComplete}
+        visible={isDashboard}
+      />
       <header className="app-title-bar border-b border-gray-800 px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
@@ -170,7 +194,7 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-6">
-        {activeTab === 'analyze' && <CSVUpload />}
+        {activeTab === 'analyze' && <CSVUpload snapCount={snapCount} />}
         {activeTab === 'dashboard' && (
           <div className="resource-hud-page space-y-6">
             <LiveTicker
