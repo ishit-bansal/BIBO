@@ -1,8 +1,71 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Handjet";
+  src: url("./assets/font/Handjet-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Handjet";
+  src: url("./assets/font/Handjet-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Handjet";
+  src: url("./assets/font/Handjet-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+:root {
+  --font-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Handjet', 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
 body {
   margin: 0;
   background-color: #0a0e1a;
   color: #e0e6ed;
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.sentinel-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+/* Force numeric/status UI that uses Tailwind's font-mono to use Handjet too. */
+.font-mono {
+  font-family: var(--font-display) !important;
+  font-variant-numeric: normal;
+  font-feature-settings: "tnum" 0, "lnum" 1;
+}
+
+/* Readability pass: upscale small utility text used throughout widgets/tables. */
+.text-xs {
+  font-size: 0.95rem !important;
+  line-height: 1.2 !important;
+}
+
+.text-sm {
+  font-size: 1.05rem !important;
+  line-height: 1.25 !important;
+}
+
+.text-\[9px\] {
+  font-size: 0.9rem !important;
+}
+
+.text-\[10px\] {
+  font-size: 0.95rem !important;
+}
+
+.text-\[11px\] {
+  font-size: 1rem !important;
 }

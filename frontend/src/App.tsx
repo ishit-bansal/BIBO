@@ -30,7 +30,7 @@ function App() {
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`h-3 w-3 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)] ${live.connected ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'}`} />
-            <h1 className="text-xl font-bold tracking-wide text-white">
+            <h1 className="sentinel-display text-3xl font-bold leading-none text-white">
               PROJECT SENTINEL
             </h1>
             <span className={`ml-2 rounded px-2 py-0.5 text-xs font-medium ${live.connected ? 'bg-emerald-900/50 text-emerald-400' : 'bg-gray-800 text-gray-500'}`}>
@@ -42,7 +42,7 @@ function App() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded px-4 py-2 text-sm font-medium transition-colors ${
+                className={`sentinel-display rounded px-4 py-2 text-lg leading-none font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-emerald-600 text-white'
                     : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
