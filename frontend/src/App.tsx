@@ -38,9 +38,12 @@ function App() {
   useEffect(() => {
     if (live.snapEvent && !snapInProgress) {
       setSnapInProgress(true);
-      setSnapCount(c => c + 1);
     }
   }, [live.snapEvent, snapInProgress]);
+
+  const handleSnapFlash = useCallback(() => {
+    setSnapCount(c => c + 1);
+  }, []);
 
   const handleSnapComplete = useCallback(() => {
     setSnapInProgress(false);
@@ -101,6 +104,7 @@ function App() {
     <div className="ui-polish-v1 min-h-screen bg-transparent text-gray-200">
       <BoSprite
         snapTriggered={snapInProgress}
+        onFlash={handleSnapFlash}
         onSnapComplete={handleSnapComplete}
         visible={isMainDashboard}
         onClick={() => setChatOpen(prev => !prev)}
@@ -116,10 +120,10 @@ function App() {
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="m-0 leading-none">
-              <span className="sr-only">PROJECT SENTINEL</span>
+              <span className="sr-only">BIBO</span>
               <img
                 src={new URL('./assets/sprites/environment/title_font.png', import.meta.url).href}
-                alt="Project Sentinel"
+                alt="BIBO"
                 className="title-logo"
               />
             </h1>

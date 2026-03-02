@@ -164,7 +164,7 @@ def _build_csv_summary(ctx: CSVContext, focus: list[str]) -> str:
     return "\n".join(lines)
 
 
-SYSTEM_PROMPT = """You are Bo, the AI assistant for Project Sentinel's Data Analysis Lab.
+SYSTEM_PROMPT = """You are Bo, the AI assistant for BIBO's Data Analysis Lab.
 You help analysts understand their uploaded resource CSV data.
 
 You have access to rich analytical context for each resource including:

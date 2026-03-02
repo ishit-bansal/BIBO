@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Project Sentinel API",
+    title="BIBO API",
     description="Command & Control backend for global resource management and intelligence processing",
     version="1.0.0",
     lifespan=lifespan,

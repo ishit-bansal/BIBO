@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 MODEL = "gemini-2.5-flash"
 
-SINGLE_PROMPT = """You are an intelligence analyst for a crisis management system called Project Sentinel.
+SINGLE_PROMPT = """You are an intelligence analyst for a crisis management system called BIBO.
 
 Analyze the following field report and extract structured information. The report text has been redacted for security -- [REDACTED_NAME] and [REDACTED_CONTACT] are placeholders for sensitive data. Do NOT try to guess or fill in redacted values.
 
@@ -30,7 +30,7 @@ Return a JSON object with exactly these fields:
 
 Return ONLY the JSON object, no markdown formatting, no code blocks, no extra text."""
 
-BATCH_PROMPT = """You are an intelligence analyst for Project Sentinel. Below are {count} field reports, each labeled [REPORT_1] through [REPORT_{count}]. Reports have been redacted: [REDACTED_NAME] and [REDACTED_CONTACT] are placeholders.
+BATCH_PROMPT = """You are an intelligence analyst for BIBO. Below are {count} field reports, each labeled [REPORT_1] through [REPORT_{count}]. Reports have been redacted: [REDACTED_NAME] and [REDACTED_CONTACT] are placeholders.
 
 For EACH report, extract:
 - "location": sector mentioned (Wakanda, New Asgard, Sokovia, Sanctum Sanctorum, Avengers Compound, or "Unknown")
