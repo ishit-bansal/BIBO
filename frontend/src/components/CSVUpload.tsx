@@ -6,6 +6,8 @@ import {
 import { analyzeCSV } from '../services/api';
 import type { AnalysisResult, AnalysisPair } from '../services/api';
 
+const snapUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/sim/snap`;
+
 const PALETTE = ['#10b981', '#3b82f6', '#a78bfa', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
 const STATUS_CFG: Record<string, { bg: string; border: string; text: string; label: string; glow: string }> = {
@@ -125,6 +127,7 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
   const [dragOver, setDragOver] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('all');
+  const [snapFiring, setSnapFiring] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const prevSnapCount = useRef(snapCount);
 
@@ -308,6 +311,14 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
     return { depleted, critical, warning, stable, avgRisk, level };
   }, [result]);
 
+  const fireSnap = useCallback(async () => {
+    setSnapFiring(true);
+    try {
+      await fetch(snapUrl, { method: 'POST' });
+    } catch { /* handled by ws listener */ }
+    setTimeout(() => setSnapFiring(false), 3000);
+  }, []);
+
   const loadDemoData = useCallback(async () => {
     setError('');
     setResult(null);
@@ -443,6 +454,47 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>{result.pairs.length} resources &middot; {result.total_records.toLocaleString()} records</span>
           <span>{result.time_range.start.slice(0, 10)} to {result.time_range.end.slice(0, 10)}</span>
+        </div>
+      </div>
+
+      {/* ── Snap Event Trigger ── */}
+      <div className="rounded-xl border border-gray-800 bg-[#0d1220] p-5">
+        <div className="flex items-center gap-5">
+          <button
+            onClick={fireSnap}
+            disabled={snapFiring}
+            className={`group relative shrink-0 rounded-xl border-2 px-6 py-4 font-bold transition-all ${
+              snapFiring
+                ? 'border-red-500 bg-red-950/40 text-red-400 cursor-not-allowed'
+                : 'border-amber-600/50 bg-amber-950/20 text-amber-400 hover:border-amber-500 hover:bg-amber-900/30 hover:scale-[1.02] active:scale-95'
+            }`}
+          >
+            <span className="sentinel-display text-lg tracking-wider flex items-center gap-2">
+              {snapFiring ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                  SNAPPING...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:rotate-12 transition-transform"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  EXECUTE SNAP
+                </>
+              )}
+            </span>
+          </button>
+          <div className="min-w-0">
+            <h3 className="sentinel-display text-sm font-bold text-amber-400 mb-1 flex items-center gap-2">
+              Real-Time Data Disruption Simulation
+              <span className="text-[9px] font-bold rounded px-1.5 py-0.5 bg-amber-900/50 text-amber-500 border border-amber-700/50 uppercase">Demo Feature</span>
+            </h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Simulates a catastrophic data event — instantly wipes out half of all loaded resource data.
+              This demonstrates that the dashboard updates <span className="text-white font-semibold">in real-time via WebSockets</span> when
+              upstream data is suddenly destroyed or corrupted. All charts, risk scores, and gauges react immediately
+              without a page refresh. Designed to showcase system resilience and live data binding during presentations.
+            </p>
+          </div>
         </div>
       </div>
 

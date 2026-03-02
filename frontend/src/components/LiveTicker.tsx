@@ -305,9 +305,10 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
 
   const chartData = useMemo(() => {
     const MA_WINDOW = 24;
-    const baseData = filteredTimeline.map(pt => {
+    const baseData = filteredTimeline.map((pt, idx) => {
       const point: Record<string, string | number> = {
-        time: fmtAxisLabel(pt.timestamp, range),
+        time: String(idx),
+        axisLabel: fmtAxisLabel(pt.timestamp, range),
         rawTime: pt.timestamp,
       };
       for (const key of RESOURCE_KEYS) {
@@ -335,7 +336,6 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
   }, [filteredTimeline, range, focusedKey]);
 
   const snapLabel = useMemo(() => {
-    // Find the chart point closest to the snap timestamp
     const snapMs = new Date(SNAP_TIME).getTime();
     let best: string | undefined;
     let bestDist = Infinity;
@@ -348,7 +348,6 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
         best = d.time as string;
       }
     }
-    // Only match if within 1 hour of the snap
     return bestDist <= 3_600_000 ? best : undefined;
   }, [chartData]);
 
@@ -466,7 +465,16 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
             <ResponsiveContainer width="100%" height={bigChartHeight}>
               <AreaChart data={chartData} margin={{ top: 5, right: 10, bottom: 0, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="time" stroke="#475569" tick={{ fontSize: 9 }} interval={tickInterval} />
+                <XAxis
+                  dataKey="time"
+                  stroke="#475569"
+                  tick={{ fontSize: 9 }}
+                  interval={tickInterval}
+                  tickFormatter={(val) => {
+                    const pt = chartData[Number(val)];
+                    return pt ? (pt.axisLabel as string) : val;
+                  }}
+                />
                 <YAxis stroke="#475569" tick={{ fontSize: 9 }} />
                 <Tooltip
                   content={<ChartTooltip focusedKey={focusedKey} />}
