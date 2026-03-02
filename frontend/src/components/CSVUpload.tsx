@@ -308,6 +308,37 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
     return { depleted, critical, warning, stable, avgRisk, level };
   }, [result]);
 
+  const loadDemoData = useCallback(async () => {
+    setError('');
+    setResult(null);
+    setLoading(true);
+    setFileName('historical_avengers_data.csv (Demo)');
+    setFocusedIdx(null);
+
+    const stepDuration = 400;
+    for (let i = 0; i < PIPELINE_STEPS.length; i++) {
+      setPipelineStep(i);
+      await new Promise(r => setTimeout(r, stepDuration));
+    }
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const resp = await fetch(`${apiUrl}/api/resources/analyze-demo`);
+      if (!resp.ok) throw new Error(`Analysis failed (${resp.status})`);
+      const res: AnalysisResult = await resp.json();
+      setResult(res);
+      if (res.pairs.length > 0) {
+        const waterIdx = res.pairs.findIndex(p => p.resource_type.toLowerCase().includes('water'));
+        setFocusedIdx(waterIdx >= 0 ? waterIdx : 0);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load demo data');
+    } finally {
+      setLoading(false);
+      setPipelineStep(0);
+    }
+  }, []);
+
   const reset = () => {
     setResult(null);
     setFileName('');
@@ -353,6 +384,25 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
             <p className="text-xs text-gray-600 mt-1">Supports historical_avengers_data.csv format</p>
             <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={onInputChange} />
           </div>
+
+          <div className="mt-4 flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div className="h-px w-12 bg-gray-800" />
+              <span className="text-xs text-gray-600 uppercase tracking-wider">or</span>
+              <div className="h-px w-12 bg-gray-800" />
+            </div>
+          </div>
+
+          <button
+            onClick={loadDemoData}
+            className="mt-4 w-full rounded-lg border border-emerald-700/50 bg-emerald-950/30 px-6 py-3.5 text-sm font-semibold text-emerald-400 hover:bg-emerald-900/40 hover:border-emerald-600 transition-all flex items-center justify-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Load Demo Data — Avengers Historical Resource Data (10,000 records)
+          </button>
+
           {error && (
             <div className="mt-4 rounded-lg border border-red-800/50 bg-red-950/30 px-4 py-3 text-sm text-red-400">{error}</div>
           )}

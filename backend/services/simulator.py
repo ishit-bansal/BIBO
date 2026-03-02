@@ -20,7 +20,7 @@ from db.database import SessionLocal
 from db.models import ResourceLog
 
 TICK_INTERVAL = 2.0  # wall-clock seconds between ticks
-DEFAULT_START_TIME = "2026-01-07T12:00:00"
+DEFAULT_START_TIME = "2026-01-05T00:00:00"
 
 
 class LiveSimulator:
@@ -179,7 +179,16 @@ class LiveSimulator:
                 await asyncio.sleep(5)
                 continue
 
-            idx = self._tick_index % len(self._timestamps)
+            if self._tick_index >= len(self._timestamps):
+                await self._broadcast({
+                    "type": "sim_complete",
+                    "message": "Simulation has reached the end of available data.",
+                    "total_ticks": len(self._timestamps),
+                })
+                await asyncio.sleep(5)
+                continue
+
+            idx = self._tick_index
             ts = self._timestamps[idx]
             readings = self._data_by_ts.get(ts, [])
             analytics = self._compute_analytics(idx)
@@ -196,6 +205,11 @@ class LiveSimulator:
 
             self._tick_index += 1
             await asyncio.sleep(TICK_INTERVAL)
+
+    async def restart(self):
+        """Reset the simulator back to DEFAULT_START_TIME."""
+        async with self._lock:
+            self._seek_to_default_start()
 
     async def seek(self, target: int | str):
         """Jump the simulator to a specific tick index or ISO timestamp."""

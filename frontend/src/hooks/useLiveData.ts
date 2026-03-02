@@ -54,6 +54,7 @@ export function useLiveData() {
   const [simTime, setSimTime] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [snapEvent, setSnapEvent] = useState<SnapEvent | null>(null);
+  const [simComplete, setSimComplete] = useState(false);
 
   const [fullTimeline, setFullTimeline] = useState<TimelinePoint[]>([]);
   const [timelineLoaded, setTimelineLoaded] = useState(false);
@@ -76,6 +77,16 @@ export function useLiveData() {
 
   const clearSnap = useCallback(() => setSnapEvent(null), []);
 
+  const restartSim = useCallback(async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      await fetch(`${apiUrl}/api/sim/restart`, { method: 'POST' });
+      setSimComplete(false);
+    } catch (err) {
+      console.error('Failed to restart sim:', err);
+    }
+  }, []);
+
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
@@ -91,11 +102,15 @@ export function useLiveData() {
     ws.onmessage = (evt) => {
       const msg = JSON.parse(evt.data);
       if (msg.type === 'resource_tick') {
+        setSimComplete(false);
         setCurrentTick(msg as ResourceTick);
         setSimTime(msg.timestamp);
         setProgress(Math.round((msg.tick_index / msg.total_ticks) * 100));
       } else if (msg.type === 'snap_event') {
         setSnapEvent(msg as SnapEvent);
+      } else if (msg.type === 'sim_complete') {
+        setSimComplete(true);
+        setProgress(100);
       }
     };
   }, [reloadTimeline]);
@@ -117,5 +132,7 @@ export function useLiveData() {
     timelineLoaded,
     snapEvent,
     clearSnap,
+    simComplete,
+    restartSim,
   };
 }

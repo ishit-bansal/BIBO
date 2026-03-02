@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { fetchReports, batchProcessReports, fetchRedactionLog } from '../services/api';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { fetchReports, batchProcessReports, resetReports, fetchRedactionLog } from '../services/api';
 import type { IntelReport, RedactionLog } from '../services/api';
 
 const URGENCY_COLORS: Record<string, string> = {
@@ -200,15 +200,24 @@ function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () 
   );
 }
 
+function hasRedactions(report: IntelReport): boolean {
+  if (!report.processed || !report.redacted_text) return false;
+  return report.raw_text !== report.redacted_text;
+}
+
 export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
   const [reports, setReports] = useState<IntelReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [filter, setFilter] = useState('all');
+  const [processElapsed, setProcessElapsed] = useState(0);
+  const processTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState('all');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
   const [auditLog, setAuditLog] = useState<RedactionLog | null>(null);
   const [auditLoading, setAuditLoading] = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const openAudit = async (report: IntelReport) => {
     if (!report.processed || !report.report_id) return;
@@ -233,13 +242,17 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
 
   const handleBatchProcess = async () => {
     setProcessing(true);
+    setProcessElapsed(0);
+    const start = Date.now();
+    processTimer.current = setInterval(() => setProcessElapsed(Date.now() - start), 100);
     try {
       const result = await batchProcessReports();
       if (result.processed_count === 0) {
         setToast({ message: 'All reports are already processed.', type: 'info' });
       } else {
+        const secs = ((Date.now() - start) / 1000).toFixed(1);
         setToast({
-          message: `Successfully processed ${result.processed_count} reports.${result.error_count ? ` (${result.error_count} errors)` : ''}`,
+          message: `Processed ${result.processed_count} reports in ${secs}s — PII redaction + AI entity extraction complete.${result.error_count ? ` (${result.error_count} errors)` : ''}`,
           type: 'success',
         });
       }
@@ -247,29 +260,42 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
     } catch {
       setToast({ message: 'Failed to process reports. Check backend connection.', type: 'info' });
     } finally {
+      if (processTimer.current) clearInterval(processTimer.current);
+      processTimer.current = null;
       setProcessing(false);
-      setTimeout(() => setToast(null), 4000);
+      setTimeout(() => setToast(null), 6000);
+    }
+  };
+
+  const handleReset = async () => {
+    setResetting(true);
+    try {
+      const result = await resetReports();
+      setToast({ message: `Reset complete — ${result.report_count} reports reloaded as unprocessed.`, type: 'info' });
+      loadReports();
+    } catch {
+      setToast({ message: 'Failed to reset reports.', type: 'info' });
+    } finally {
+      setResetting(false);
+      setTimeout(() => setToast(null), 5000);
     }
   };
 
   const unprocessedCount = reports.filter(r => !r.processed).length;
   const processedCount = reports.filter(r => r.processed).length;
+  const redactedCount = reports.filter(r => hasRedactions(r)).length;
 
   const filtered = reports.filter(r => {
-    if (filter === 'all') return true;
-    if (filter === 'processed') return r.processed;
-    if (filter === 'unprocessed') return !r.processed;
-    return r.priority === filter;
+    if (priorityFilter === 'all') return true;
+    return r.priority === priorityFilter;
   });
 
-  const urgencyBreakdown = useMemo(() => {
-    const counts: Record<string, number> = { critical: 0, high: 0, medium: 0, low: 0 };
-    for (const r of reports) {
-      const u = r.structured_data?.urgency;
-      if (u && u in counts) counts[u]++;
-    }
-    return counts;
-  }, [reports]);
+  const priorityOptions = [
+    { value: 'all', label: 'All Priorities', count: reports.length },
+    { value: 'Avengers Level Threat', label: 'Avengers Level', count: reports.filter(r => r.priority === 'Avengers Level Threat').length },
+    { value: 'High', label: 'High Priority', count: reports.filter(r => r.priority === 'High').length },
+    { value: 'Routine', label: 'Routine', count: reports.filter(r => r.priority === 'Routine').length },
+  ];
 
   if (loading) {
     return <div className="h-96 animate-pulse rounded-lg bg-gray-800/50" />;
@@ -278,31 +304,110 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
     <div className="space-y-4">
 
+      {/* Explainer Banner */}
+      <div className="rounded-xl border border-gray-800 bg-[#0d1220] p-5">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-900/40 border border-emerald-700/50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <h2 className="sentinel-display text-xl font-bold text-white mb-1">Intelligence Processing Center</h2>
+            <p className="text-sm text-gray-400 leading-relaxed max-w-3xl">
+              Field intel reports from agents across all sectors. Each report passes through a
+              <span className="text-cyan-400 font-semibold"> security middleware layer</span> before analysis:
+              <span className="text-red-400 font-semibold"> PII Redaction</span> (server-side regex strips hero real names and contact numbers) →
+              <span className="text-purple-400 font-semibold"> AI Entity Extraction</span> (redacted text is batched and sent to Gemini LLM for structured extraction — location, resources, urgency, actions).
+              No personally identifiable information ever leaves the server.
+              Hit <span className="text-amber-400 font-semibold">"Process All"</span> to run the middleware pipeline, or <span className="text-gray-300 font-semibold">"Reset"</span> to clear and start fresh.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Processing Overlay */}
+      {processing && (() => {
+        const e = processElapsed;
+        const steps = [
+          { label: 'PII Redaction', desc: 'Stripping names & contacts', done: e > 800,
+            doneClass: 'border-red-700/50 bg-red-950/30', activeClass: 'border-red-600/50 bg-red-950/20 animate-pulse' },
+          { label: 'Text Batching', desc: '20 reports/call × 10 parallel', done: e > 1500,
+            doneClass: 'border-amber-700/50 bg-amber-950/30', activeClass: 'border-amber-600/50 bg-amber-950/20 animate-pulse' },
+          { label: 'Gemini AI', desc: 'Entity extraction via LLM', done: e > 11000,
+            doneClass: 'border-purple-700/50 bg-purple-950/30', activeClass: 'border-purple-600/50 bg-purple-950/20 animate-pulse' },
+          { label: 'DB Commit', desc: 'Saving structured data', done: false,
+            doneClass: 'border-emerald-700/50 bg-emerald-950/30', activeClass: 'border-emerald-600/50 bg-emerald-950/20 animate-pulse' },
+        ];
+        return (
+          <div className="rounded-xl border border-emerald-800/50 bg-[#0a0f1a] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="sentinel-display text-lg font-bold text-white">Middleware Pipeline Running</h3>
+              <span className="font-mono text-2xl font-bold text-emerald-400">{(e / 1000).toFixed(1)}s</span>
+            </div>
+
+            <div className="flex items-center gap-2 mb-5 flex-wrap">
+              {steps.map((step, i) => {
+                const isActive = !step.done && (i === 0 || steps[i - 1].done);
+                const cls = step.done ? step.doneClass : isActive ? step.activeClass : 'border-gray-800 bg-gray-900/40';
+                return (
+                  <React.Fragment key={step.label}>
+                    <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-all ${cls}`}>
+                      {step.done ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-400"><polyline points="20 6 9 17 4 12"/></svg>
+                      ) : isActive ? (
+                        <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 rounded-full bg-gray-700" />
+                      )}
+                      <div>
+                        <div className="text-xs font-semibold text-gray-200">{step.label}</div>
+                        <div className="text-[10px] text-gray-500">{step.desc}</div>
+                      </div>
+                    </div>
+                    {i < steps.length - 1 && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={step.done ? '#10b981' : '#374151'} strokeWidth="2" className="shrink-0"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+
+            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-300"
+                style={{ width: `${Math.min(95, (e / 150))}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Running {unprocessedCount} reports through the security middleware — PII redaction → Gemini AI extraction
+            </p>
+          </div>
+        );
+      })()}
+
       {/* Summary Stats Bar */}
-      <div className="grid grid-cols-6 gap-3">
+      <div className="grid grid-cols-5 gap-3">
         <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
           <div className="text-[10px] uppercase text-gray-500 font-semibold">Total Reports</div>
           <div className="text-xl font-bold text-white font-mono">{reports.length}</div>
+        </div>
+        <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
+          <div className="text-[10px] uppercase text-gray-500 font-semibold">Unprocessed</div>
+          <div className="text-xl font-bold text-amber-400 font-mono">{unprocessedCount}</div>
         </div>
         <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
           <div className="text-[10px] uppercase text-gray-500 font-semibold">Processed</div>
           <div className="text-xl font-bold text-emerald-400 font-mono">{processedCount}</div>
         </div>
         <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
-          <div className="text-[10px] uppercase text-gray-500 font-semibold">Critical</div>
-          <div className="text-xl font-bold text-red-400 font-mono">{urgencyBreakdown.critical}</div>
+          <div className="text-[10px] uppercase text-red-500/70 font-semibold flex items-center gap-1">
+            PII Redacted
+            <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+          </div>
+          <div className="text-xl font-bold text-red-400 font-mono">{redactedCount}</div>
         </div>
         <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
-          <div className="text-[10px] uppercase text-gray-500 font-semibold">High</div>
-          <div className="text-xl font-bold text-amber-400 font-mono">{urgencyBreakdown.high}</div>
-        </div>
-        <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
-          <div className="text-[10px] uppercase text-gray-500 font-semibold">Medium</div>
-          <div className="text-xl font-bold text-yellow-400 font-mono">{urgencyBreakdown.medium}</div>
-        </div>
-        <div className="rounded-lg border border-gray-800 bg-[#0d1220] p-3">
-          <div className="text-[10px] uppercase text-gray-500 font-semibold">Low</div>
-          <div className="text-xl font-bold text-emerald-400 font-mono">{urgencyBreakdown.low}</div>
+          <div className="text-[10px] uppercase text-gray-500 font-semibold">Showing</div>
+          <div className="text-xl font-bold text-white font-mono">{filtered.length}</div>
         </div>
       </div>
 
@@ -310,57 +415,81 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
       <div className="intel-grid-white-panel rounded-lg border border-gray-300 bg-white p-5">
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold text-white">Intelligence Feed</h2>
-          <span className="rounded bg-white border border-gray-300 px-2 py-0.5 text-xs text-gray-700">
-            {filtered.length} reports
-          </span>
-          <div className="ml-auto flex gap-2">
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="intel-feed-dropdown rounded border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm text-gray-200"
-            >
-              <option value="all">All Reports</option>
-              <option value="processed">Processed</option>
-              <option value="unprocessed">Unprocessed</option>
-              <option value="Avengers Level Threat">Avenger-Level</option>
-              <option value="High">High Priority</option>
-              <option value="Routine">Routine</option>
-            </select>
+          <div className="ml-auto flex items-center gap-2">
+            {/* Priority filter dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setFilterOpen(prev => !prev)}
+                className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 hover:border-gray-600 transition-colors"
+              >
+                <span>{priorityOptions.find(o => o.value === priorityFilter)?.label ?? 'All'}</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${filterOpen ? 'rotate-180' : ''}`}>
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {filterOpen && (
+                <div className="absolute right-0 top-full mt-1 min-w-[200px] rounded-lg border border-gray-700 bg-gray-900 shadow-xl z-50 overflow-hidden">
+                  {priorityOptions.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => { setPriorityFilter(opt.value); setFilterOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between ${
+                        priorityFilter === opt.value
+                          ? 'bg-emerald-900/40 text-emerald-400'
+                          : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      <span className="text-xs text-gray-500 font-mono">{opt.count}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleBatchProcess}
-              disabled={processing}
-              className="rounded bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+              disabled={processing || resetting || unprocessedCount === 0}
+              className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
             >
-              {processing ? 'Processing...' : 'Process All'}
+              {processing ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>Process All ({unprocessedCount})</>
+              )}
+            </button>
+
+            <button
+              onClick={handleReset}
+              disabled={resetting || processing}
+              className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-1.5 text-sm font-medium text-gray-400 transition-colors hover:text-white hover:border-gray-500 disabled:opacity-50 flex items-center gap-2"
+              title="Clear all processed data and reload reports fresh"
+            >
+              {resetting ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                  Reset
+                </>
+              )}
             </button>
           </div>
         </div>
 
         {toast && (
-          <div className={`mb-4 rounded border p-3 text-sm ${
+          <div className={`mb-4 rounded-lg border p-3 text-sm ${
             toast.type === 'success'
               ? 'border-emerald-800 bg-emerald-900/30 text-emerald-300'
               : 'border-sky-800 bg-sky-900/30 text-sky-300'
           }`}>
             {toast.message}
-          </div>
-        )}
-
-        {unprocessedCount > 0 && !processing && (
-          <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-800/50 bg-amber-950/30 px-4 py-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-amber-400">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            <div className="flex-1">
-              <span className="text-sm font-semibold text-amber-300">{unprocessedCount} unprocessed report{unprocessedCount > 1 ? 's' : ''}</span>
-              <span className="text-xs text-amber-400/70 ml-2">PII redaction + AI extraction has not been run yet.</span>
-            </div>
-            <button
-              onClick={handleBatchProcess}
-              className="rounded bg-amber-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-amber-500 transition-colors"
-            >
-              Process All
-            </button>
           </div>
         )}
 
@@ -392,7 +521,18 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-xs text-gray-400 font-mono">
-                      {report.hero_alias || '—'}
+                      <span className="flex items-center gap-1.5">
+                        {report.hero_alias || '—'}
+                        {hasRedactions(report) && (
+                          <span
+                            className="relative flex h-2.5 w-2.5 shrink-0"
+                            title="PII was redacted from this report"
+                          >
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-50 animate-ping" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                          </span>
+                        )}
+                      </span>
                     </td>
                     <td className="px-3 py-2.5 text-gray-200">
                       {report.structured_data?.location ?? '---'}

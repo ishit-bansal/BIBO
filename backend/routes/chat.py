@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-MODEL = "gemini-2.5-flash-lite"
+MODEL = "gemini-2.5-flash"
 
 # ── request / response schemas ────────────────────────────
 

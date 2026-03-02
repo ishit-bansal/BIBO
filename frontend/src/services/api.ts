@@ -87,7 +87,14 @@ export const submitReport = (data: {
 
 export const batchProcessReports = () =>
   API.post<{ status: string; processed_count: number; error_count: number }>(
-    '/api/reports/batch'
+    '/api/reports/batch',
+    undefined,
+    { timeout: 300_000 },
+  ).then(r => r.data);
+
+export const resetReports = () =>
+  API.post<{ status: string; report_count: number }>(
+    '/api/reports/reset',
   ).then(r => r.data);
 
 export const fetchPredictions = () =>

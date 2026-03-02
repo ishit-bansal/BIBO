@@ -1,16 +1,18 @@
 """Gemini LLM integration for structured entity extraction from field reports."""
+import asyncio
 import os
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from google import genai
 
 logger = logging.getLogger(__name__)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-MODEL = "gemini-2.5-flash-lite"
+MODEL = "gemini-2.5-flash"
 
-EXTRACTION_PROMPT = """You are an intelligence analyst for a crisis management system called Project Sentinel.
+SINGLE_PROMPT = """You are an intelligence analyst for a crisis management system called Project Sentinel.
 
 Analyze the following field report and extract structured information. The report text has been redacted for security -- [REDACTED_NAME] and [REDACTED_CONTACT] are placeholders for sensitive data. Do NOT try to guess or fill in redacted values.
 
@@ -28,37 +30,96 @@ Return a JSON object with exactly these fields:
 
 Return ONLY the JSON object, no markdown formatting, no code blocks, no extra text."""
 
+BATCH_PROMPT = """You are an intelligence analyst for Project Sentinel. Below are {count} field reports, each labeled [REPORT_1] through [REPORT_{count}]. Reports have been redacted: [REDACTED_NAME] and [REDACTED_CONTACT] are placeholders.
+
+For EACH report, extract:
+- "location": sector mentioned (Wakanda, New Asgard, Sokovia, Sanctum Sanctorum, Avengers Compound, or "Unknown")
+- "resource_mentioned": resource mentioned (Vibranium (kg), Arc Reactor Cores, Pym Particles, Clean Water (L), Medical Kits, or "Unknown")
+- "status": one of "critical", "compromised", "secured", "depleted", "unknown"
+- "action_required": one sentence max
+- "urgency": one of "low", "medium", "high", "critical"
+
+{reports_block}
+
+Return a JSON array of {count} objects in the SAME order as the reports. No markdown, no code blocks, ONLY the JSON array."""
+
+_client = None
+_executor = ThreadPoolExecutor(max_workers=15)
+
+
+def _get_client():
+    global _client
+    if _client is None and GEMINI_API_KEY and GEMINI_API_KEY != "your-gemini-api-key-here":
+        _client = genai.Client(api_key=GEMINI_API_KEY)
+    return _client
+
 
 def extract_report_data(redacted_text: str) -> dict:
-    """Send redacted report text to Gemini and get structured extraction."""
-    if not GEMINI_API_KEY or GEMINI_API_KEY == "your-gemini-api-key-here":
+    """Send a single redacted report text to Gemini and get structured extraction."""
+    client = _get_client()
+    if not client:
         return _fallback_extraction(redacted_text)
 
     try:
-        client = genai.Client(api_key=GEMINI_API_KEY)
-        prompt = EXTRACTION_PROMPT.format(report_text=redacted_text)
-
-        response = client.models.generate_content(
-            model=MODEL,
-            contents=prompt,
-        )
-
-        raw_response = response.text.strip()
-
-        if raw_response.startswith("```"):
-            raw_response = raw_response.split("\n", 1)[1]
-            raw_response = raw_response.rsplit("```", 1)[0].strip()
-
-        result = json.loads(raw_response)
+        prompt = SINGLE_PROMPT.format(report_text=redacted_text)
+        response = client.models.generate_content(model=MODEL, contents=prompt)
+        raw = _strip_codeblock(response.text.strip())
+        result = json.loads(raw)
         _validate_extraction(result)
         return result
-
     except json.JSONDecodeError as e:
         logger.warning(f"LLM returned invalid JSON: {e}")
         return _fallback_extraction(redacted_text)
     except Exception as e:
         logger.warning(f"LLM call failed: {e}")
         return _fallback_extraction(redacted_text)
+
+
+def extract_batch(texts: list[str]) -> list[dict]:
+    """Send up to ~25 reports in one Gemini call, get back a list of extractions."""
+    client = _get_client()
+    if not client:
+        return [_fallback_extraction(t) for t in texts]
+
+    reports_block = "\n\n".join(
+        f"[REPORT_{i+1}]\n{text}" for i, text in enumerate(texts)
+    )
+    prompt = BATCH_PROMPT.format(
+        count=len(texts), reports_block=reports_block
+    )
+
+    try:
+        response = client.models.generate_content(model=MODEL, contents=prompt)
+        raw = _strip_codeblock(response.text.strip())
+        results = json.loads(raw)
+
+        if not isinstance(results, list) or len(results) != len(texts):
+            logger.warning(f"Batch LLM returned {type(results).__name__} length {len(results) if isinstance(results, list) else '?'}, expected list of {len(texts)}")
+            return [_fallback_extraction(t) for t in texts]
+
+        for r in results:
+            _validate_extraction(r)
+        return results
+
+    except json.JSONDecodeError as e:
+        logger.warning(f"Batch LLM returned invalid JSON: {e}")
+        return [_fallback_extraction(t) for t in texts]
+    except Exception as e:
+        logger.warning(f"Batch LLM call failed: {e}")
+        return [_fallback_extraction(t) for t in texts]
+
+
+async def extract_batch_async(texts: list[str]) -> list[dict]:
+    """Async wrapper for batch extraction."""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(_executor, extract_batch, texts)
+
+
+def _strip_codeblock(text: str) -> str:
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1]
+        text = text.rsplit("```", 1)[0].strip()
+    return text
 
 
 def _validate_extraction(data: dict) -> None:

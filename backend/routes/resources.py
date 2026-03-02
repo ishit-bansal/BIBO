@@ -14,7 +14,22 @@ from db.database import get_db
 from db.models import ResourceLog
 from schemas.schemas import ResourceLogOut, LatestStock
 
+from fastapi.responses import FileResponse
+import os
+
 router = APIRouter(prefix="/api/resources", tags=["Resources"])
+
+DEMO_CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "historical_avengers_data.csv")
+if not os.path.exists(DEMO_CSV_PATH):
+    DEMO_CSV_PATH = "/app/historical_avengers_data.csv"
+
+
+@router.get("/demo-csv")
+def get_demo_csv():
+    """Serve the demo CSV file for the Data Analysis Lab."""
+    if not os.path.exists(DEMO_CSV_PATH):
+        raise HTTPException(status_code=404, detail="Demo CSV file not found")
+    return FileResponse(DEMO_CSV_PATH, media_type="text/csv", filename="historical_avengers_data.csv")
 
 
 @router.get("/sectors", response_model=list[str])
@@ -176,22 +191,8 @@ def upload_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
 MA_WINDOW = 24
 
 
-@router.post("/analyze")
-def analyze_csv(file: UploadFile = File(...)):
-    """Analyze an uploaded CSV in-memory: MA, regression, forecast per pair."""
-    if not file.filename or not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Only CSV files are accepted")
-
-    content = file.file.read().decode("utf-8")
-    df = pd.read_csv(StringIO(content))
-
-    required_cols = {"timestamp", "sector_id", "resource_type", "stock_level"}
-    if not required_cols.issubset(set(df.columns)):
-        raise HTTPException(
-            status_code=400,
-            detail=f"CSV must contain columns: {required_cols}",
-        )
-
+def _analyze_dataframe(df: pd.DataFrame) -> dict:
+    """Core analysis logic for a CSV dataframe. Returns the full analysis result dict."""
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.sort_values("timestamp")
 
@@ -380,3 +381,37 @@ def analyze_csv(file: UploadFile = File(...)):
         "total_records": total_records,
         "time_range": {"start": time_start, "end": time_end},
     }
+
+
+@router.post("/analyze")
+def analyze_csv(file: UploadFile = File(...)):
+    """Analyze an uploaded CSV in-memory: MA, regression, forecast per pair."""
+    if not file.filename or not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files are accepted")
+
+    content = file.file.read().decode("utf-8")
+    df = pd.read_csv(StringIO(content))
+
+    required_cols = {"timestamp", "sector_id", "resource_type", "stock_level"}
+    if not required_cols.issubset(set(df.columns)):
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must contain columns: {required_cols}",
+        )
+
+    return _analyze_dataframe(df)
+
+
+@router.get("/analyze-demo")
+def analyze_demo_csv():
+    """Analyze the built-in demo CSV directly from disk."""
+    if not os.path.exists(DEMO_CSV_PATH):
+        raise HTTPException(status_code=404, detail="Demo CSV file not found")
+
+    df = pd.read_csv(DEMO_CSV_PATH)
+
+    required_cols = {"timestamp", "sector_id", "resource_type", "stock_level"}
+    if not required_cols.issubset(set(df.columns)):
+        raise HTTPException(status_code=500, detail="Demo CSV missing required columns")
+
+    return _analyze_dataframe(df)

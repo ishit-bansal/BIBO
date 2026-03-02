@@ -3,7 +3,6 @@ import './index.css';
 import StatCards from './components/StatCards';
 import SectorHeatmap from './components/SectorHeatmap';
 import IntelTable from './components/IntelTable';
-import ReportForm from './components/ReportForm';
 import CSVUpload from './components/CSVUpload';
 import HeroMap from './components/HeroMap';
 import SupplyChainMap from './components/SupplyChainMap';
@@ -18,13 +17,7 @@ import type { AnalysisResult } from './services/api';
 
 const bgMusicUrl = new URL('./assets/sprites/sounds/background_sound.mp3', import.meta.url).href;
 
-type Tab = 'analyze' | 'dashboard' | 'ops' | 'intel' | 'submit' | 'personnel';
-
-const SUPPLY_CHAIN_TABS: { id: Tab; label: string }[] = [
-  { id: 'dashboard', label: 'Resources' },
-  { id: 'ops', label: 'Operations' },
-  { id: 'intel', label: 'Intelligence' },
-];
+type Tab = 'analyze' | 'dashboard' | 'ops' | 'intel' | 'personnel';
 
 function canAccess(tabRole: UserRole, userRole: UserRole): boolean {
   if (userRole === 'admin') return true;
@@ -32,10 +25,8 @@ function canAccess(tabRole: UserRole, userRole: UserRole): boolean {
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('analyze');
+  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [scOpen, setScOpen] = useState(false);
-  const scRef = useRef<HTMLDivElement>(null);
   const live = useLiveData();
   const [snapInProgress, setSnapInProgress] = useState(false);
   const [snapCount, setSnapCount] = useState(0);
@@ -54,14 +45,6 @@ function App() {
   const handleSnapComplete = useCallback(() => {
     setSnapInProgress(false);
     clearSnapRef.current();
-  }, []);
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (scRef.current && !scRef.current.contains(e.target as Node)) setScOpen(false);
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -89,23 +72,25 @@ function App() {
   }
 
   const isAdmin = authUser.role === 'admin';
-  const isSupplyChainActive = ['dashboard', 'ops', 'intel'].includes(activeTab);
 
   const handleLogout = () => {
     setAuthUser(null);
-    setActiveTab('analyze');
+    setActiveTab('dashboard');
   };
 
-  const navBtn = (id: Tab, label: string) => (
+  const navBtn = (id: Tab, label: string, isLive?: boolean) => (
     <button
       key={id}
       onClick={() => setActiveTab(id)}
-      className={`top-nav-tab sentinel-display rounded px-4 py-2 text-lg leading-none font-medium transition-colors ${
+      className={`top-nav-tab sentinel-display rounded px-4 py-2 text-lg leading-none font-medium transition-colors flex items-center gap-1.5 ${
         activeTab === id
           ? 'bg-emerald-600 text-white'
           : 'text-white hover:bg-gray-800 hover:text-white'
       }`}
     >
+      {isLive && live.connected && (
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      )}
       {label}
     </button>
   );
@@ -144,43 +129,10 @@ function App() {
           </div>
           <div className="flex items-center gap-4">
             <nav className="flex gap-1 items-center">
-              {navBtn('analyze', 'Dashboard')}
-
-              {/* Supply Chain dropdown */}
-              <div ref={scRef} className="relative">
-                <button
-                  onClick={() => setScOpen(prev => !prev)}
-                  className={`top-nav-tab sentinel-display rounded px-4 py-2 text-lg leading-none font-medium transition-colors flex items-center gap-1.5 ${
-                    isSupplyChainActive
-                      ? 'bg-emerald-600 text-white'
-                      : 'text-white hover:bg-gray-800 hover:text-white'
-                  }`}
-                >
-                  Supply Chain
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${scOpen ? 'rotate-180' : ''}`}>
-                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                {scOpen && (
-                  <div className="sc-dropdown-panel absolute top-full left-0 mt-1 min-w-[180px] rounded-lg border border-gray-300 bg-white shadow-xl z-50 overflow-hidden">
-                    {SUPPLY_CHAIN_TABS.map(t => (
-                      <button
-                        key={t.id}
-                        onClick={() => { setActiveTab(t.id); setScOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors sentinel-display ${
-                          activeTab === t.id
-                            ? 'bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500'
-                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {isAdmin && navBtn('submit', 'Testing')}
+              {navBtn('dashboard', 'Resources', true)}
+              {navBtn('ops', 'Operations', true)}
+              {navBtn('intel', 'Intelligence')}
+              {navBtn('analyze', 'Data Lab')}
               {isAdmin && navBtn('personnel', 'Personnel')}
             </nav>
 
@@ -216,6 +168,8 @@ function App() {
               currentTick={live.currentTick}
               fullTimeline={live.fullTimeline}
               timelineLoaded={live.timelineLoaded}
+              simComplete={live.simComplete}
+              onRestart={live.restartSim}
             />
             <StatCards analytics={live.currentTick?.analytics} simTime={live.simTime} />
             <SectorHeatmap analytics={live.currentTick?.analytics} />
@@ -228,9 +182,6 @@ function App() {
           </div>
         )}
         {activeTab === 'intel' && <IntelTable isAdmin={isAdmin} />}
-        {activeTab === 'submit' && canAccess('admin', authUser.role) && (
-          <ReportForm />
-        )}
         {activeTab === 'personnel' && canAccess('admin', authUser.role) && (
           <UserManagement currentUser={authUser} />
         )}

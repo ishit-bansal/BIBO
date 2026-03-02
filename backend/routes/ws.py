@@ -47,6 +47,13 @@ async def sim_seek(
     return {"error": "Provide either ?tick=N or ?time=ISO_TIMESTAMP"}
 
 
+@router.post("/api/sim/restart")
+async def restart_sim():
+    """Restart the simulation from the beginning."""
+    await simulator.restart()
+    return simulator.timeline_info
+
+
 @router.post("/api/sim/snap")
 async def execute_snap():
     """THE SNAP: broadcast a snap event to all connected clients.

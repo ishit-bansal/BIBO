@@ -38,8 +38,9 @@ def seed_resource_logs(session):
 def seed_intel_reports(session):
     existing = session.query(IntelReport).count()
     if existing > 0:
-        print(f"intel_reports already has {existing} rows, skipping.")
-        return
+        print(f"Resetting {existing} intel reports to unprocessed state...")
+        session.query(IntelReport).delete()
+        session.commit()
 
     print(f"Reading {JSON_PATH}...")
     with open(JSON_PATH) as f:
@@ -60,7 +61,7 @@ def seed_intel_reports(session):
         session.add(record)
 
     session.commit()
-    print(f"Inserted {len(reports)} intel report records.")
+    print(f"Inserted {len(reports)} intel report records (unprocessed).")
 
 
 def main():

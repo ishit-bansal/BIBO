@@ -96,7 +96,6 @@ function ChartTooltip({ active, payload, focusedKey }: {
     : payload;
 
   const maEntry = payload.find(p => p.dataKey === 'MA');
-  const fcstEntry = payload.find(p => p.dataKey === 'FCST');
 
   return (
     <div className="rounded-lg border border-gray-700 bg-[#0f1729] px-3 py-2 shadow-xl">
@@ -117,19 +116,10 @@ function ChartTooltip({ active, payload, focusedKey }: {
       })}
       {maEntry && (
         <div className="flex items-center gap-2 py-0.5 border-t border-gray-800 mt-1 pt-1">
-          <span className="h-2 w-0.5 border-t border-dashed border-white/60" />
+          <span className="h-2 w-0.5 border-t border-dashed border-orange-400" />
           <span className="text-[10px] text-gray-500 w-28">24h Moving Avg</span>
-          <span className="text-[10px] font-mono text-gray-400 ml-auto">
+          <span className="text-[10px] font-mono text-orange-300 ml-auto">
             {maEntry.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-          </span>
-        </div>
-      )}
-      {fcstEntry && (
-        <div className="flex items-center gap-2 py-0.5">
-          <span className="h-2 w-0.5 border-t border-dashed border-red-400" />
-          <span className="text-[10px] text-red-400 w-28">Forecast</span>
-          <span className="text-[10px] font-mono text-red-300 ml-auto">
-            {fcstEntry.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}
           </span>
         </div>
       )}
@@ -250,6 +240,8 @@ interface Props {
   currentTick: ResourceTick | null;
   fullTimeline: TimelinePoint[];
   timelineLoaded: boolean;
+  simComplete?: boolean;
+  onRestart?: () => void;
 }
 
 // Map focused keys to their sector/resource for the predictions API
@@ -261,9 +253,9 @@ const KEY_TO_PARTS: Record<string, { sector: string; resource: string }> = {
   'Avengers Compound|Medical Kits': { sector: 'Avengers Compound', resource: 'Medical Kits' },
 };
 
-export default function LiveTicker({ connected, simTime, progress, currentTick, fullTimeline, timelineLoaded }: Props) {
+export default function LiveTicker({ connected, simTime, progress, currentTick, fullTimeline, timelineLoaded, simComplete, onRestart }: Props) {
   const [range, setRange] = useState<TimeRange>('all');
-  const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  const [focusedKey, setFocusedKey] = useState<string | null>('Sanctum Sanctorum|Clean Water (L)');
   const [trendData, setTrendData] = useState<TrendLine | null>(null);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const analytics = currentTick?.analytics ?? {};
@@ -312,6 +304,7 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
   }, [filteredTimeline]);
 
   const chartData = useMemo(() => {
+    const MA_WINDOW = 24;
     const baseData = filteredTimeline.map(pt => {
       const point: Record<string, string | number> = {
         time: fmtAxisLabel(pt.timestamp, range),
@@ -324,32 +317,22 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
       return point;
     });
 
-    // When focused with trend data, merge MA line and append forecast points
-    if (!focusedKey || !trendData) return baseData;
-
-    const short = SHORT_NAMES[focusedKey];
-    const maByTs = new Map(trendData.ma_series.map(m => [m.timestamp, m.ma_stock]));
-
-    // Add MA values to existing data points
-    for (const pt of baseData) {
-      const ma = maByTs.get(pt.rawTime as string);
-      if (ma !== undefined) pt['MA'] = ma;
-    }
-
-    // Append forecast points beyond the data
-    if (trendData.forecast.length > 0) {
-      for (const fc of trendData.forecast) {
-        if (baseData.some(d => d.rawTime === fc.timestamp)) continue;
-        baseData.push({
-          time: fmtAxisLabel(fc.timestamp, range),
-          rawTime: fc.timestamp,
-          FCST: fc.predicted_stock,
-        });
+    if (focusedKey) {
+      const short = SHORT_NAMES[focusedKey];
+      for (let i = 0; i < baseData.length; i++) {
+        if (i < MA_WINDOW - 1) continue;
+        let sum = 0;
+        let count = 0;
+        for (let j = i - MA_WINDOW + 1; j <= i; j++) {
+          const v = baseData[j][short];
+          if (typeof v === 'number') { sum += v; count++; }
+        }
+        if (count > 0) baseData[i]['MA'] = Math.round((sum / count) * 100) / 100;
       }
     }
 
     return baseData;
-  }, [filteredTimeline, range, focusedKey, trendData]);
+  }, [filteredTimeline, range, focusedKey]);
 
   const snapLabel = useMemo(() => {
     // Find the chart point closest to the snap timestamp
@@ -394,7 +377,7 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
   const bigChartHeight = focusedKey ? 300 : 220;
 
   function handleCardClick(key: string) {
-    setFocusedKey(prev => prev === key ? null : key);
+    setFocusedKey(key);
   }
 
   return (
@@ -412,6 +395,14 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
             <div className="h-full rounded-full bg-emerald-600 transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
           <span className="font-mono w-8 text-right">{progress}%</span>
+          {simComplete && onRestart && (
+            <button
+              onClick={onRestart}
+              className="ml-1 px-2.5 py-1 text-[10px] font-bold rounded bg-emerald-600 text-white hover:bg-emerald-500 transition-colors animate-pulse"
+            >
+              ↻ RESTART
+            </button>
+          )}
         </div>
       </div>
 
@@ -498,31 +489,17 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
                   />
                 ))}
                 {/* ML trend: moving average line */}
-                {focusedKey && trendData && trendData.ma_series.length > 0 && (
+                {focusedKey && (
                   <Line
                     type="monotone"
                     dataKey="MA"
-                    stroke="#ffffff"
-                    strokeWidth={1.5}
+                    stroke="#f97316"
+                    strokeWidth={2}
                     strokeDasharray="6 3"
                     dot={false}
                     isAnimationActive={false}
                     connectNulls
                     name="24h Moving Avg"
-                  />
-                )}
-                {/* ML trend: forecast/depletion projection line */}
-                {focusedKey && trendData && trendData.forecast.length > 0 && (
-                  <Line
-                    type="monotone"
-                    dataKey="FCST"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    strokeDasharray="8 4"
-                    dot={false}
-                    isAnimationActive={false}
-                    connectNulls
-                    name="Predicted Depletion"
                   />
                 )}
                 {focusedKey && (
@@ -568,13 +545,8 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
               <span className="text-[9px] text-gray-500 uppercase">Depletion Rate</span>
               <span className="text-[10px] font-bold text-gray-300 font-mono">{prediction.depletion_rate.toFixed(2)}/hr</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-900/60 border border-gray-800">
-              <span className="text-[9px] text-gray-500 uppercase">Confidence</span>
-              <span className="text-[10px] font-bold text-gray-300 font-mono">{(prediction.confidence_score * 100).toFixed(1)}%</span>
-            </div>
             <div className="flex items-center gap-3 text-[9px] text-gray-600">
-              <span className="flex items-center gap-1"><span className="w-4 border-t-2 border-dashed border-white/60" /> 24h MA</span>
-              <span className="flex items-center gap-1"><span className="w-4 border-t-2 border-dashed border-red-400" /> Forecast</span>
+              <span className="flex items-center gap-1"><span className="w-4 border-t-2 border-dashed border-orange-400" /> 24h MA</span>
             </div>
           </div>
         )}
