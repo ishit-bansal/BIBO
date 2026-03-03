@@ -63,14 +63,13 @@ def enroll_face(
     if len(req.descriptor) != 128:
         raise HTTPException(status_code=400, detail="Face descriptor must have 128 dimensions")
 
-    # First enrollment is unrestricted (bootstrap the first admin).
-    # Subsequent self-enrollment as "user" is always allowed so every
-    # device / person can access the app independently.
-    if faces and req.role == "admin" and x_auth_role != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Only administrators can enroll new admins",
-        )
+    # First enrollment is unrestricted (bootstrap the first admin)
+    if faces:
+        if x_auth_role != "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="Only administrators can enroll new personnel",
+            )
 
     # Reject duplicate names
     if any(f["name"].lower() == req.name.strip().lower() for f in faces):

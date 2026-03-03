@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as faceapi from 'face-api.js';
-import { fetchFaces, enrollFace } from '../services/api';
 import type { FaceRecord } from '../services/api';
+
+const FACES_KEY = 'bibo_faces';
+
+function loadLocalFaces(): FaceRecord[] {
+  try {
+    const raw = localStorage.getItem(FACES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveLocalFaces(faces: FaceRecord[]) {
+  localStorage.setItem(FACES_KEY, JSON.stringify(faces));
+}
 
 /* ── Custom CAPTCHA ──────────────────────────────────── */
 
@@ -179,24 +191,17 @@ export default function LoginPage({ onLogin }: Props) {
   const [facesLoading, setFacesLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
 
-  // Bootstrap state — only shows when zero users enrolled
+  // Bootstrap state — only shows when zero users enrolled on this device
   const [bootstrapName, setBootstrapName] = useState('');
   const [bootstrapLoading, setBootstrapLoading] = useState(false);
-
-  // Self-enroll mode — for new users who aren't in the system
-  const [enrollMode, setEnrollMode] = useState(false);
-  const [enrollName, setEnrollName] = useState('');
-  const [enrollLoading, setEnrollLoading] = useState(false);
 
   const streamRef = useRef<MediaStream | null>(null);
   const detectIntervalRef = useRef<number | null>(null);
 
-  // Load enrolled faces from backend
+  // Load enrolled faces from this device's localStorage
   useEffect(() => {
-    fetchFaces()
-      .then(setFaces)
-      .catch(() => setFaces([]))
-      .finally(() => setFacesLoading(false));
+    setFaces(loadLocalFaces());
+    setFacesLoading(false);
   }, []);
 
   const isBootstrap = !facesLoading && faces.length === 0;
@@ -295,7 +300,7 @@ export default function LoginPage({ onLogin }: Props) {
     };
   }, [cameraReady, faces, isBootstrap, detectFace]);
 
-  // --- Bootstrap: first admin enrollment ---
+  // --- Bootstrap: first admin enrollment (per-device) ---
   const handleBootstrap = async () => {
     if (!bootstrapName.trim()) {
       setError('Enter your name to continue.');
@@ -312,51 +317,18 @@ export default function LoginPage({ onLogin }: Props) {
       return;
     }
 
-    try {
-      await enrollFace(
-        { name: bootstrapName.trim(), role: 'admin', descriptor: Array.from(detection.descriptor) },
-        '', ''
-      );
-      const updated = await fetchFaces();
-      setFaces(updated);
-      setBootstrapName('');
-      setStatus('Administrator enrolled. You can now log in.');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Enrollment failed';
-      setError(msg);
-    } finally {
-      setBootstrapLoading(false);
-    }
-  };
-
-  // --- Self-enroll: any new person can sign up ---
-  const handleSelfEnroll = async () => {
-    if (!enrollName.trim()) { setError('Enter your name.'); return; }
-    setError('');
-    setEnrollLoading(true);
-    setStatus('Capturing face for enrollment...');
-    const detection = await detectFace();
-    if (!detection) {
-      setError('No face detected. Position your face in the frame and try again.');
-      setEnrollLoading(false);
-      return;
-    }
-    try {
-      await enrollFace(
-        { name: enrollName.trim(), role: 'user', descriptor: Array.from(detection.descriptor) },
-        '', ''
-      );
-      const updated = await fetchFaces();
-      setFaces(updated);
-      setEnrollMode(false);
-      setEnrollName('');
-      setStatus('Enrolled! You can now log in.');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Enrollment failed';
-      setError(msg);
-    } finally {
-      setEnrollLoading(false);
-    }
+    const record: FaceRecord = {
+      id: crypto.randomUUID(),
+      name: bootstrapName.trim(),
+      role: 'admin',
+      descriptor: Array.from(detection.descriptor),
+    };
+    const updated = [...faces, record];
+    saveLocalFaces(updated);
+    setFaces(updated);
+    setBootstrapName('');
+    setStatus('Administrator enrolled. You can now log in.');
+    setBootstrapLoading(false);
   };
 
   // --- Face login ---
@@ -528,7 +500,7 @@ export default function LoginPage({ onLogin }: Props) {
             )}
 
             {/* === NORMAL LOGIN MODE === */}
-            {!isBootstrap && !facesLoading && !enrollMode && (
+            {!isBootstrap && !facesLoading && (
               <div className="space-y-3">
                 {/* CAPTCHA */}
                 <CaptchaWidget onVerify={setCaptchaVerified} />
@@ -541,50 +513,9 @@ export default function LoginPage({ onLogin }: Props) {
                   {scanning ? 'Verifying identity...' : 'Authenticate'}
                 </button>
 
-                <div className="text-center pt-2 space-y-1">
-                  <div className="text-[10px] text-gray-500">{faces.length} personnel enrolled</div>
-                  <button
-                    onClick={() => { setEnrollMode(true); setError(''); }}
-                    className="text-xs text-emerald-600 hover:text-emerald-500 font-semibold transition-colors"
-                  >
-                    New here? Enroll your face
-                  </button>
+                <div className="text-center text-[10px] text-gray-500 pt-1">
+                  {faces.length} personnel enrolled on this device
                 </div>
-              </div>
-            )}
-
-            {/* === SELF-ENROLL MODE === */}
-            {!isBootstrap && !facesLoading && enrollMode && (
-              <div className="space-y-3">
-                <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5">
-                  <span className="text-xs text-blue-700 font-semibold">Self-Enrollment</span>
-                  <p className="text-xs text-blue-600 mt-0.5">Position your face in the frame and enter your name to register.</p>
-                </div>
-
-                <div>
-                  <label className="text-xs text-gray-600 block mb-1">Your Name</label>
-                  <input
-                    type="text"
-                    value={enrollName}
-                    onChange={e => setEnrollName(e.target.value)}
-                    placeholder="e.g. Tony Stark"
-                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                    onKeyDown={e => e.key === 'Enter' && handleSelfEnroll()}
-                  />
-                </div>
-                <button
-                  onClick={handleSelfEnroll}
-                  disabled={!faceDetected || !enrollName.trim() || enrollLoading || cameraError}
-                  className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-40 transition-colors"
-                >
-                  {enrollLoading ? 'Enrolling...' : 'Enroll & Register'}
-                </button>
-                <button
-                  onClick={() => { setEnrollMode(false); setError(''); }}
-                  className="w-full text-center text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  Back to login
-                </button>
               </div>
             )}
 
