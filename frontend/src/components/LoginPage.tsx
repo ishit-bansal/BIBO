@@ -6,13 +6,13 @@ const FACES_KEY = 'bibo_faces';
 
 function loadLocalFaces(): FaceRecord[] {
   try {
-    const raw = localStorage.getItem(FACES_KEY);
+    const raw = sessionStorage.getItem(FACES_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
 function saveLocalFaces(faces: FaceRecord[]) {
-  localStorage.setItem(FACES_KEY, JSON.stringify(faces));
+  sessionStorage.setItem(FACES_KEY, JSON.stringify(faces));
 }
 
 /* ── Custom CAPTCHA ──────────────────────────────────── */
