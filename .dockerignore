@@ -2,7 +2,6 @@
 .gitignore
 .env
 .env.example
-*.md
 __pycache__
 *.pyc
 frontend/node_modules

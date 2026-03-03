@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { fetchReports, batchProcessReports, resetReports, fetchRedactionLog } from '../services/api';
 import type { IntelReport, RedactionLog } from '../services/api';
 

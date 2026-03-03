@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker } from 're
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchSectorSummaries, fetchHeroEvents } from '../services/api';
-import type { SectorSummary, SectorEvent, Hero, HeroMission } from '../services/api';
+import type { SectorSummary, SectorEvent, Hero } from '../services/api';
 
 const HERO_ICON_SPRITES: Record<string, string> = {
   thor: new URL('../assets/sprites/hero_icons/Thor.png', import.meta.url).href,

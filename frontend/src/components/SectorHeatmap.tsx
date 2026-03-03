@@ -9,14 +9,6 @@ const RESOURCE_KEYS = [
   'Avengers Compound|Medical Kits',
 ];
 
-const SHORT: Record<string, string> = {
-  'Wakanda|Arc Reactor Cores': 'ARC',
-  'New Asgard|Vibranium (kg)': 'VBR',
-  'Sanctum Sanctorum|Clean Water (L)': 'H2O',
-  'Sokovia|Pym Particles': 'PYM',
-  'Avengers Compound|Medical Kits': 'MED',
-};
-
 const COLORS: Record<string, string> = {
   'Wakanda|Arc Reactor Cores': '#10b981',
   'New Asgard|Vibranium (kg)': '#3b82f6',

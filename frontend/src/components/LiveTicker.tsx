@@ -127,23 +127,6 @@ function ChartTooltip({ active, payload, focusedKey }: {
   );
 }
 
-/* ── ticker tape item ─────────────────────────────────── */
-
-function TickerItem({ a, color, short }: { a: ResourceAnalytics; color: string; short: string }) {
-  const isUp = a.hourly_change >= 0;
-  return (
-    <div className="flex items-center gap-2 px-3 py-1.5 whitespace-nowrap border-r border-gray-800/50 last:border-r-0">
-      <span className="h-2 w-2 rounded-full" style={{ background: color }} />
-      <span className="text-xs font-bold text-gray-300">{short}</span>
-      <span className="text-xs font-mono text-gray-200">{a.avg_stock.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-      <span className={`text-[10px] font-semibold font-mono ${isUp ? 'text-emerald-400' : a.hourly_change === 0 ? 'text-gray-500' : 'text-red-400'}`}>
-        {isUp ? '▲' : a.hourly_change === 0 ? '—' : '▼'} {Math.abs(a.hourly_change).toFixed(1)}
-        {a.change_pct !== 0 && <span className="ml-0.5">({Math.abs(a.change_pct).toFixed(2)}%)</span>}
-      </span>
-    </div>
-  );
-}
-
 /* ── clickable resource card with sparkline ───────────── */
 
 function ResourceCard({ analyticsKey, analytics, sparkData, color, short, isFocused, onClick }: {
@@ -256,7 +239,7 @@ const KEY_TO_PARTS: Record<string, { sector: string; resource: string }> = {
 export default function LiveTicker({ connected, simTime, progress, currentTick, fullTimeline, timelineLoaded, simComplete, onRestart }: Props) {
   const [range, setRange] = useState<TimeRange>('all');
   const [focusedKey, setFocusedKey] = useState<string | null>('Sanctum Sanctorum|Clean Water (L)');
-  const [trendData, setTrendData] = useState<TrendLine | null>(null);
+  const [_trendData, setTrendData] = useState<TrendLine | null>(null);
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const analytics = currentTick?.analytics ?? {};
 

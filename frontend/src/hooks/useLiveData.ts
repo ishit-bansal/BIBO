@@ -39,7 +39,10 @@ export type { TimelinePoint };
 
 /* ── hook ──────────────────────────────────────────────── */
 
-const WS_URL = `${(import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/^http/, 'ws')}/ws/live`;
+const _apiBase = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV ? 'http://localhost:8000' : window.location.origin
+);
+const WS_URL = `${_apiBase.replace(/^http/, 'ws')}/ws/live`;
 
 export interface SnapEvent {
   type: 'snap_event';
@@ -79,7 +82,7 @@ export function useLiveData() {
 
   const restartSim = useCallback(async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const apiUrl = _apiBase;
       await fetch(`${apiUrl}/api/sim/restart`, { method: 'POST' });
       setSimComplete(false);
     } catch (err) {

@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-});
+const API_BASE = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV ? 'http://localhost:8000' : ''
+);
+
+const API = axios.create({ baseURL: API_BASE });
 
 export interface ResourceLog {
   id: number;
@@ -181,6 +183,7 @@ export interface AnalysisPair {
   raw: { timestamp: string; stock: number }[];
   ma: { timestamp: string; ma_stock: number }[];
   forecast: { timestamp: string; predicted_stock: number }[];
+  regression?: { timestamp: string; reg_stock: number }[];
   weekly_forecast: WeeklyForecastDay[];
 }
 

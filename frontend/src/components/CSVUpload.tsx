@@ -1,4 +1,5 @@
-import { useState, useRef, useMemo, useCallback, useEffect, DragEvent } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import type { DragEvent } from 'react';
 import {
   ComposedChart, Area, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
@@ -6,7 +7,10 @@ import {
 import { analyzeCSV } from '../services/api';
 import type { AnalysisResult, AnalysisPair } from '../services/api';
 
-const snapUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/sim/snap`;
+const _apiBase = import.meta.env.VITE_API_URL || (
+  import.meta.env.DEV ? 'http://localhost:8000' : ''
+);
+const snapUrl = `${_apiBase}/api/sim/snap`;
 
 const PALETTE = ['#10b981', '#3b82f6', '#a78bfa', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
 
@@ -157,7 +161,7 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
             ...d,
             predicted_stock: +Math.max(0, d.predicted_stock * 0.5).toFixed(2),
           }));
-          const halfReg = regArr.map(d => ({
+          const halfReg = regArr.map((d: { timestamp: string; reg_stock: number }) => ({
             ...d,
             reg_stock: +(d.reg_stock * 0.5).toFixed(2),
           }));
@@ -333,7 +337,7 @@ export default function CSVUpload({ snapCount = 0, onAnalysisChange }: CSVUpload
     }
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const apiUrl = _apiBase;
       const resp = await fetch(`${apiUrl}/api/resources/analyze-demo`);
       if (!resp.ok) throw new Error(`Analysis failed (${resp.status})`);
       const res: AnalysisResult = await resp.json();
