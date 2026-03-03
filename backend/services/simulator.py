@@ -182,10 +182,11 @@ class LiveSimulator:
             if self._tick_index >= len(self._timestamps):
                 await self._broadcast({
                     "type": "sim_complete",
-                    "message": "Simulation has reached the end of available data.",
+                    "message": "Simulation has reached the end of available data. Auto-restarting...",
                     "total_ticks": len(self._timestamps),
                 })
-                await asyncio.sleep(5)
+                await asyncio.sleep(3)
+                self._seek_to_default_start()
                 continue
 
             idx = self._tick_index
@@ -251,6 +252,23 @@ class LiveSimulator:
 
     def unsubscribe(self, q: asyncio.Queue):
         self.clients.discard(q)
+
+    def get_current_tick(self) -> dict | None:
+        """Return the current tick's full data for immediate delivery to new clients."""
+        if not self._timestamps or self._tick_index >= len(self._timestamps):
+            return None
+        idx = self._tick_index
+        ts = self._timestamps[idx]
+        readings = self._data_by_ts.get(ts, [])
+        analytics = self._compute_analytics(idx)
+        return {
+            "type": "resource_tick",
+            "timestamp": ts.isoformat(),
+            "tick_index": idx,
+            "total_ticks": len(self._timestamps),
+            "readings": readings,
+            "analytics": analytics,
+        }
 
     @property
     def timeline_info(self) -> dict:

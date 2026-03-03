@@ -1,6 +1,7 @@
 """WebSocket + simulation control endpoints."""
 
 import asyncio
+import json
 from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
@@ -12,6 +13,12 @@ router = APIRouter(tags=["WebSocket"])
 @router.websocket("/ws/live")
 async def live_feed(websocket: WebSocket):
     await websocket.accept()
+
+    # Send the current tick immediately so new clients don't wait
+    current = simulator.get_current_tick()
+    if current:
+        await websocket.send_text(json.dumps(current))
+
     queue = simulator.subscribe()
     try:
         while True:
