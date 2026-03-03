@@ -85,8 +85,8 @@ function highlightReplacements(text: string): React.JSX.Element {
 
 function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative mx-4 max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-xl border border-gray-300 bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" style={{ paddingTop: '70px' }} onClick={onClose}>
+      <div className="relative mx-4 max-h-[calc(100vh-90px)] w-full max-w-5xl overflow-hidden rounded-xl border border-gray-300 bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-white">
           <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ function RedactionAuditModal({ log, onClose }: { log: RedactionLog; onClose: () 
           </button>
         </div>
 
-        <div className="overflow-y-auto p-6 space-y-5 bg-white" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+        <div className="overflow-y-auto p-6 space-y-5 bg-white" style={{ maxHeight: 'calc(100vh - 170px)' }}>
 
           {/* Pipeline Flow Visualization */}
           <div className="rounded-lg border border-gray-300 bg-gray-50 p-4">
@@ -312,7 +312,7 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
           <div>
             <h2 className="sentinel-display text-xl font-bold text-white mb-1">Intelligence Processing Center</h2>
-            <p className="text-sm text-gray-400 leading-relaxed max-w-3xl">
+            <p className="text-sm text-gray-400 leading-relaxed">
               Field intel reports from agents across all sectors. Each report passes through a
               <span className="text-cyan-400 font-semibold"> security middleware layer</span> before analysis:
               <span className="text-red-400 font-semibold"> PII Redaction</span> (server-side regex strips hero real names and contact numbers) →
@@ -328,13 +328,13 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
       {processing && (() => {
         const e = processElapsed;
         const steps = [
-          { label: 'PII Redaction', desc: 'Stripping names & contacts', done: e > 800,
+          { label: 'PII Redaction', desc: 'Stripping names & contacts', done: e > 2000,
             doneClass: 'border-red-700/50 bg-red-950/30', activeClass: 'border-red-600/50 bg-red-950/20 animate-pulse' },
-          { label: 'Text Batching', desc: '20 reports/call × 10 parallel', done: e > 1500,
+          { label: 'Text Batching', desc: '20 reports/call × 10 parallel', done: e > 4000,
             doneClass: 'border-amber-700/50 bg-amber-950/30', activeClass: 'border-amber-600/50 bg-amber-950/20 animate-pulse' },
-          { label: 'Gemini AI', desc: 'Entity extraction via LLM', done: e > 11000,
+          { label: 'Gemini AI', desc: 'Entity extraction via LLM', done: e > 16000,
             doneClass: 'border-purple-700/50 bg-purple-950/30', activeClass: 'border-purple-600/50 bg-purple-950/20 animate-pulse' },
-          { label: 'DB Commit', desc: 'Saving structured data', done: false,
+          { label: 'DB Commit', desc: 'Saving structured data', done: e > 19000,
             doneClass: 'border-emerald-700/50 bg-emerald-950/30', activeClass: 'border-emerald-600/50 bg-emerald-950/20 animate-pulse' },
         ];
         return (
@@ -374,7 +374,7 @@ export default function IntelTable({ isAdmin = false }: { isAdmin?: boolean }) {
             <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-300"
-                style={{ width: `${Math.min(95, (e / 150))}%` }}
+                style={{ width: `${Math.min(95, (e / 210))}%` }}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">

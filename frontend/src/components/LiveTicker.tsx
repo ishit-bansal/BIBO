@@ -380,17 +380,21 @@ export default function LiveTicker({ connected, simTime, progress, currentTick, 
           {simComplete && onRestart && (
             <button
               onClick={onRestart}
-              className="ml-1 px-2.5 py-1 text-[10px] font-bold rounded bg-emerald-600 text-white hover:bg-emerald-500 transition-colors animate-pulse"
+              className="ml-2 px-4 py-1.5 text-xs font-black tracking-wider rounded-lg text-white transition-all shadow-lg shadow-amber-500/25 hover:scale-105 hover:shadow-amber-500/40"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)', animation: 'pulse 1.5s ease-in-out infinite' }}
             >
-              ↻ RESTART
+              ↻ RESTART SIMULATION
             </button>
           )}
         </div>
       </div>
 
-      {/* spacer (ticker tape removed) */}
+      {/* initial loading state while waiting for the first WebSocket tick */}
       {Object.keys(analytics).length === 0 && (
-        <div className="px-4 py-2 text-[10px] text-gray-600 bg-[#080c16]">Waiting for first data tick…</div>
+        <div className="px-4 py-3 flex items-center gap-3 bg-[#080c16]">
+          <div className="w-3 h-3 border-2 border-gray-700 border-t-emerald-500 rounded-full animate-spin" />
+          <span className="text-[10px] text-gray-500">Connecting to live data stream — first tick arriving shortly…</span>
+        </div>
       )}
 
       <div className="p-4">
