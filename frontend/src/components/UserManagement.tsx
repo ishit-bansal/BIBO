@@ -1,8 +1,20 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as faceapi from 'face-api.js';
-import { fetchFaces, enrollFace, removeFace } from '../services/api';
 import type { FaceRecord } from '../services/api';
 import type { AuthUser } from './LoginPage';
+
+const FACES_KEY = 'bibo_faces';
+
+function loadLocalFaces(): FaceRecord[] {
+  try {
+    const raw = localStorage.getItem(FACES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveLocalFaces(faces: FaceRecord[]) {
+  localStorage.setItem(FACES_KEY, JSON.stringify(faces));
+}
 
 interface Props {
   currentUser: AuthUser;
@@ -27,12 +39,12 @@ export default function UserManagement({ currentUser }: Props) {
 
   const loadFaces = useCallback(() => {
     setLoading(true);
-    fetchFaces().then(setFaces).catch(() => setFaces([])).finally(() => setLoading(false));
+    setFaces(loadLocalFaces());
+    setLoading(false);
   }, []);
 
   useEffect(loadFaces, [loadFaces]);
 
-  // Start camera when enrollment form is shown
   useEffect(() => {
     if (!showCamera) return;
 
@@ -63,7 +75,6 @@ export default function UserManagement({ currentUser }: Props) {
     };
   }, [showCamera]);
 
-  // Detection loop
   useEffect(() => {
     if (!cameraReady) return;
 
@@ -105,42 +116,39 @@ export default function UserManagement({ currentUser }: Props) {
       return;
     }
 
-    try {
-      const result = await enrollFace(
-        { name: name.trim(), role, descriptor: Array.from(det.descriptor) },
-        currentUser.role,
-        currentUser.name,
-      );
-      setSuccess(`${result.name} enrolled as ${result.role}.`);
-      setName('');
-      setShowCamera(false);
-      loadFaces();
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const resp = err as { response?: { data?: { detail?: string } } };
-        setError(resp.response?.data?.detail || 'Enrollment failed.');
-      } else {
-        setError('Enrollment failed. Check backend connection.');
-      }
-    } finally {
+    const existing = loadLocalFaces();
+    if (existing.some(f => f.name.toLowerCase() === name.trim().toLowerCase())) {
+      setError(`'${name.trim()}' is already enrolled on this device.`);
       setEnrolling(false);
+      return;
     }
+
+    const record: FaceRecord = {
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      role,
+      descriptor: Array.from(det.descriptor),
+    };
+    const updated = [...existing, record];
+    saveLocalFaces(updated);
+    setFaces(updated);
+    setSuccess(`${record.name} enrolled as ${record.role}.`);
+    setName('');
+    setShowCamera(false);
+    setEnrolling(false);
   };
 
-  const handleRemove = async (id: string) => {
+  const handleRemove = (id: string) => {
     if (id === currentUser.id) {
       setError('You cannot remove your own account while logged in.');
       return;
     }
     setError('');
-    try {
-      await removeFace(id, currentUser.role);
-      setConfirmDelete(null);
-      loadFaces();
-      setSuccess('Personnel removed.');
-    } catch {
-      setError('Failed to remove. Check permissions.');
-    }
+    const updated = loadLocalFaces().filter(f => f.id !== id);
+    saveLocalFaces(updated);
+    setFaces(updated);
+    setConfirmDelete(null);
+    setSuccess('Personnel removed.');
   };
 
   if (currentUser.role !== 'admin') {
@@ -154,11 +162,10 @@ export default function UserManagement({ currentUser }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Personnel Management</h2>
-          <p className="text-xs text-gray-500">{faces.length} enrolled</p>
+          <p className="text-xs text-gray-500">{faces.length} enrolled on this device</p>
         </div>
         {!showCamera && (
           <button
@@ -181,7 +188,6 @@ export default function UserManagement({ currentUser }: Props) {
         </div>
       )}
 
-      {/* Enrollment Form */}
       {showCamera && (
         <div className="rounded-lg border border-gray-300 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -195,7 +201,6 @@ export default function UserManagement({ currentUser }: Props) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Camera */}
             <div className="relative rounded-lg overflow-hidden bg-gray-100">
               <video ref={videoRef} autoPlay muted playsInline className="w-full h-auto" style={{ transform: 'scaleX(-1)' }} />
               <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" style={{ transform: 'scaleX(-1)' }} />
@@ -207,7 +212,6 @@ export default function UserManagement({ currentUser }: Props) {
               </div>
             </div>
 
-            {/* Form */}
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-gray-700 block mb-1 font-medium">Full Name</label>
@@ -255,7 +259,6 @@ export default function UserManagement({ currentUser }: Props) {
         </div>
       )}
 
-      {/* Personnel List */}
       <div className="rounded-lg border border-gray-300 bg-white overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-8 text-center text-xs text-gray-500 animate-pulse">Loading...</div>
