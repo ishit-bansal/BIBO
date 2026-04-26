@@ -2,6 +2,8 @@
 
 A full-stack real-time crisis management system that combines interactive data visualization, live WebSocket simulation, AI-powered intelligence processing, ML-based resource forecasting, face-recognition authentication, and supply chain logistics — all wrapped in a custom pixel-art UI themed around the Avengers Initiative.
 
+**[Live Site](https://bibo.ishitbansal.com/)**
+
 ---
 
 ## Table of Contents
